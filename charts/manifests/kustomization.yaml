@@ -1,8 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- https://raw.githubusercontent.com/alvarogg777/argo-combined-demo/master/argo-workflows/overlays/production/regcred.yaml
+- regcred.yaml
 - longhorn.yaml
+- authsecrets.yaml
+- https://raw.githubusercontent.com/alvarogg777/helm-charts/patch-464a49c/charts/postgres/manifests/postgres.yaml
+- https://raw.githubusercontent.com/alvarogg777/minio-charts/patch-02-14/manifests/minio.yaml
 patchesStrategicMerge:
 - patch-chart.yaml
-namespace: longhorn-system
+namespace: storage-system
