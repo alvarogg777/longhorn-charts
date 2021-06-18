@@ -3,7 +3,7 @@ kind: SealedSecret
 metadata:
   creationTimestamp: null
   name: regcred
-  namespace: storage-system
+  namespace: storage
 spec:
   encryptedData:
     .dockerconfigjson: AgCDD3bdqMTuh0FFJtmD3gj4MWZBx7OCy4+sG7d5y7k6R+V5aSrKLypU8tiNyX94zY49bUmZatSFReTTZGwSPpNb5XmlJChOlsKaJNa4Bbkk4V0mNKTHWVFzLnUG2U+m32gapvx6bLg0S3iWw/3zORX4VymL1/DGUHSqfFrIRGb7cg+nhNBSeb5b99l5XEiF7OwSfsdjL8B76ZU/jdIGkJ708hgFJ2F9mJSU1vs+TKj434wJ6w6WFp5RyzKSJ+B4Hc1fPhzs+Gh51eoo2jA8+auQsYiAV0p8hh7DxuBC+Y7pMz9lG9ecxzT8sqHoE20dcL1QMwi9DDtOZnxQrSB4j1XRDsbXIHGRARIsxIcqGAXCFK6tzqdMXiSOnvIboTHqbUEuOncbI1tt4gAjabJBTRRkfkjr7CtgjFba3rgr3V6+XtCoFp34zRGYPqP6AK3UefOynwKSZAQSs5U2eH0Ph2Ua9UQ9MjZpVb1RQ+0j7Dn2UFU4D5NIVAAH9sIEIAoyOlkwQ5TvCdNu4N/A/gGv6G27QkUGSXhz+BtrTb+YwG31PjAPyaCAHLQUV8o9H/p+MShJM/fQDBMQg6NfelHghjFGCojM68qUv4XNzWHGm/EOuQzBrWC4MhAU4J8YrHRm4lBccd7lJYCXNeCfLpGwVbBzb7UchW0KM5MyLJ/hmquWwVy7j83arCNKHMCjxTavsKatFzkm+y1TTLNY2DpEzZ+SqHJdImh4EFjpLLbLgtSYwSjaCIwv9VmXq7wu4GL7D9pmptCdmu0BTrZdChBi3ntZZBztbCnO0ZTJfZBCSwDVX9bGiBRczQXhak9F0EzMTlQkRu/YLJ9Hs/7jy9xnj6zox3nPdbYNq9GmjAl5JpLaqHZPQ9cGsxk2HNA6KxA/qZ23JqbruS+VhDuT01zTwtwo8NIml/G1
@@ -12,6 +12,6 @@ spec:
     metadata:
       creationTimestamp: null
       name: regcred
-      namespace: storage-system
+      namespace: storage
     type: kubernetes.io/dockerconfigjson
 

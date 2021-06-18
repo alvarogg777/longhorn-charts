@@ -8,4 +8,4 @@ resources:
 - https://raw.githubusercontent.com/alvarogg777/minio-charts/patch-02-14/manifests/minio.yaml
 patchesStrategicMerge:
 - patch-chart.yaml
-namespace: storage-system
+namespace: storage
