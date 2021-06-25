@@ -138,24 +138,6 @@ data:
     createBucket storage none false 
     createBucket temp none false
 ---
-# Source: minio/templates/pvc.yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: minio
-  labels:
-    app: minio
-    chart: minio-8.0.10
-    release: minio
-    heritage: Helm
-spec:
-  accessModes:
-    - "ReadWriteOnce"
-  resources:
-    requests:
-      storage: "10Gi"
-  storageClassName: "longhorn"
----
 # Source: minio/templates/post-install-prometheus-metrics-role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -306,8 +288,8 @@ spec:
         - name: regcred
       volumes:
         - name: export
-          persistentVolumeClaim:
-            claimName: minio
+          emptyDir:
+              {}
 ---
 # Source: minio/templates/post-install-create-bucket-job.yaml
 apiVersion: batch/v1
