@@ -1,0 +1,115 @@
+# Source: postgres/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    helm.sh/chart: postgres-0.2.11
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/instance: postgres
+    app.kubernetes.io/version: "13.3"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: postgres
+      protocol: TCP
+      name: postgres
+  selector:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/instance: postgres
+---
+# Source: postgres/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  labels:
+    helm.sh/chart: postgres-0.2.11
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/instance: postgres
+    app.kubernetes.io/version: "13.3"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  serviceName: postgres
+  podManagementPolicy: OrderedReady
+  updateStrategy: 
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgres
+      app.kubernetes.io/instance: postgres
+  template:
+    metadata:
+      annotations:
+        checksum/customconfig: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+      labels:
+        app.kubernetes.io/name: postgres
+        app.kubernetes.io/instance: postgres
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      serviceAccountName: default
+      securityContext:
+        fsGroup: 999
+      containers:
+        - name: postgres
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 999
+            runAsNonRoot: true
+            runAsUser: 999
+          image: "postgres:13.3"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: postgres
+              containerPort: 5432
+              protocol: TCP
+          env:
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pg"
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: "md5"
+          envFrom:
+            - secretRef:
+                name: storage-secrets
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -h localhost
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -h localhost
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+            periodSeconds: 10
+          volumeMounts:
+            - mountPath: /var/run
+              name: run
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-data
+      volumes:
+        - name: run
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: postgres-data
+          emptyDir: {}

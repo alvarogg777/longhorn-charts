@@ -4,8 +4,8 @@ resources:
 - regcred.yaml
 - longhorn.yaml
 - authsecrets.yaml
-- https://raw.githubusercontent.com/alvarogg777/helm-charts/patch-464a49c/charts/postgres/manifests/postgres.yaml
-- https://raw.githubusercontent.com/alvarogg777/minio-charts/patch-02-14/manifests/minio.yaml
+- postgres.yaml
+- minio.yaml
 patchesStrategicMerge:
 - patch-chart.yaml
 namespace: storage
