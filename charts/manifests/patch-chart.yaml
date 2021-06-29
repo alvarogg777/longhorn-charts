@@ -4,7 +4,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: longhorn-manager
-  namespace: storage
+  namespace: longhorn-system
 spec:
   template:
     spec:
@@ -16,7 +16,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: longhorn-driver-deployer
-  namespace: storage
+  namespace: longhorn-system
 spec:
   template:
     spec:
@@ -28,7 +28,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: longhorn-ui
-  namespace: storage
+  namespace: longhorn-system
 spec:
   template:
     spec:
@@ -40,7 +40,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: longhorn-post-upgrade
-  namespace: storage
+  namespace: longhorn-system
 spec:
   template:
     spec:
@@ -52,7 +52,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: longhorn-uninstall
-  namespace: storage
+  namespace: longhorn-system
 spec:
   template:
     spec:
