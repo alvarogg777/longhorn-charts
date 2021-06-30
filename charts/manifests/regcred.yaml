@@ -1,0 +1,17 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: regcred
+  namespace: longhorn-system
+spec:
+  encryptedData:
+    .dockerconfigjson: AgAVQMi5kukvp2u6UBLR3xHXMNMSriXAzYFf2GHGmh+JwJ2sQjNgOviXTlYzBPTwanNQISKFnmNp5hmeDa7kVRG4ilvRMysbq6gNeipjRyxb9Bm+9clXgce9SbQVV+PRNoMBphNGgGp9dcg68kiVFTTlOgoLquKrYgUOL20ewY62zn6Zhazl4sMym0gXY6F+T4KVIDwrCf6QC8VuOR2FN5EyJ4HtFSP7J783U4iVfRlvcIKCVXUauArEMnXN2Lbp91r99qMUoAHZ+sKmcVqsQm51MUvVX5xeLZy120W3fzoofb8RktFLcsIDnxExTilVunK+UMNbKHw5mQ4r/ZdEdmKlsgeQctq+MwHRSvJ0yLXW66sjAXUCj2jD52fm4HMcF1N3/jb3WSK9LpPBrn+X2GH+gMW53TYoFSgyZXPTmaO02QbPCwoTnAPn8eN9Scb7U9JsYph0igbQuMMw7xapa+mUXkE0BmalqjSMCqD/tWo2O+wfJHzpCPa1hdQej+++9i8GATrGa9LQWQ5Vc5Kr70plVruScGHBVr+T0OZEi0sQxanj0JXTD7i0ECU1vdB8wIC4DOHDL+5Edo+gZO5bH5kLeKI5oirSBQv4qakInzjttRok50NASwy3vht/7X0HcZqKZ2+KjK14N1nQXJ9ykcQltyXY1WvPxW+UxyuhbAT7p9ISOWhzdLVf8GUOfaN+aSq7FR3jgRI7WpwM7MC43mZYs9/aj2jOGK/uwv/9ca2lmAoiMnEtYGJjV9OtSOP+fWbBeanWl4b55PKXydCAPD4ZYoPJRY5N8IdT+wj5V25vY9SmZMD+wFB1u1UoFNqBWfIeTYLpJ1cCi1aNVyUXzXvd8RlbUN4IZp13CJHjK7JiUgKq+oOQyrV7VY1xAf3/RFiyN0fS7+zFz2SHHafqZSxJEDBciZnL
+  template:
+    data: null
+    metadata:
+      creationTimestamp: null
+      name: regcred
+      namespace: longhorn-system
+    type: kubernetes.io/dockerconfigjson
+
