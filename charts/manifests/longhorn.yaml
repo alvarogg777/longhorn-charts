@@ -1,144 +1,74 @@
----
-# Source: longhorn/templates/psp.yaml
-apiVersion: policy/v1beta1
-kind: PodSecurityPolicy
-metadata:
-  name: longhorn-psp
-  labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
-spec:
-  privileged: true
-  allowPrivilegeEscalation: true
-  requiredDropCapabilities:
-  - NET_RAW
-  allowedCapabilities:
-  - SYS_ADMIN
-  hostNetwork: false
-  hostIPC: false
-  hostPID: true
-  runAsUser:
-    rule: RunAsAny
-  seLinux:
-    rule: RunAsAny
-  fsGroup:
-    rule: RunAsAny
-  supplementalGroups:
-    rule: RunAsAny
-  volumes:
-  - configMap
-  - downwardAPI
-  - emptyDir
-  - secret
-  - projected
-  - hostPath
----
-# Source: longhorn/templates/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: longhorn-service-account
   namespace: storage
-  labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
 ---
-# Source: longhorn/templates/default-setting.yaml
-apiVersion: v1
-kind: ConfigMap
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
 metadata:
-  name: longhorn-default-setting
-  namespace: storage
-  labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
-data:
-  default-setting.yaml: |-
-    backup-target: 
-    backup-target-credential-secret: 
-    allow-recurring-job-while-volume-detached: 
-    create-default-disk-labeled-nodes: 
-    default-data-path: 
-    replica-soft-anti-affinity: 
-    storage-over-provisioning-percentage: 
-    storage-minimal-available-percentage: 
-    upgrade-checker: 
-    default-replica-count: 
-    default-data-locality: 
-    guaranteed-engine-cpu: 
-    default-longhorn-static-storage-class: 
-    backupstore-poll-interval: 
-    taint-toleration: 
-    system-managed-components-node-selector: 
-    priority-class: 
-    auto-salvage: 
-    auto-delete-pod-when-volume-detached-unexpectedly: 
-    disable-scheduling-on-cordoned-node: 
-    replica-zone-soft-anti-affinity: 
-    volume-attachment-recovery-policy: 
-    node-down-pod-deletion-policy: 
-    allow-node-drain-with-last-healthy-replica: 
-    mkfs-ext4-parameters: 
-    disable-replica-rebuild: 
-    replica-replenishment-wait-interval: 
-    disable-revision-counter: 
-    system-managed-pods-image-pull-policy: 
-    allow-volume-creation-with-degraded-availability: 
-    auto-cleanup-system-generated-snapshot: 
-    concurrent-automatic-engine-upgrade-per-node-limit: 
-    backing-image-cleanup-wait-interval: 
-    guaranteed-engine-manager-cpu: 
-    guaranteed-replica-manager-cpu:
+  name: longhorn-role
+rules:
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - "*"
+- apiGroups: [""]
+  resources: ["pods", "events", "persistentvolumes", "persistentvolumeclaims","persistentvolumeclaims/status", "nodes", "proxy/nodes", "pods/log", "secrets", "services", "endpoints", "configmaps"]
+  verbs: ["*"]
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get", "list"]
+- apiGroups: ["apps"]
+  resources: ["daemonsets", "statefulsets", "deployments"]
+  verbs: ["*"]
+- apiGroups: ["batch"]
+  resources: ["jobs", "cronjobs"]
+  verbs: ["*"]
+- apiGroups: ["policy"]
+  resources: ["poddisruptionbudgets"]
+  verbs: ["*"]
+- apiGroups: ["scheduling.k8s.io"]
+  resources: ["priorityclasses"]
+  verbs: ["watch", "list"]
+- apiGroups: ["storage.k8s.io"]
+  resources: ["storageclasses", "volumeattachments", "csinodes", "csidrivers"]
+  verbs: ["*"]
+- apiGroups: ["snapshot.storage.k8s.io"]
+  resources: ["volumesnapshotclasses", "volumesnapshots", "volumesnapshotcontents", "volumesnapshotcontents/status"]
+  verbs: ["*"]
+- apiGroups: ["longhorn.io"]
+  resources: ["volumes", "volumes/status", "engines", "engines/status", "replicas", "replicas/status", "settings",
+              "engineimages", "engineimages/status", "nodes", "nodes/status", "instancemanagers", "instancemanagers/status",
+              "sharemanagers", "sharemanagers/status", "backingimages", "backingimages/status",
+              "backingimagemanagers", "backingimagemanagers/status"]
+  verbs: ["*"]
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  verbs: ["*"]
+- apiGroups: ["metrics.k8s.io"]
+  resources: ["pods", "nodes"]
+  verbs: ["get", "list"]
 ---
-# Source: longhorn/templates/storageclass.yaml
-apiVersion: v1
-kind: ConfigMap
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
 metadata:
-  name: longhorn-storageclass
+  name: longhorn-bind
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: longhorn-role
+subjects:
+- kind: ServiceAccount
+  name: longhorn-service-account
   namespace: storage
-  labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
-data:
-  storageclass.yaml: |
-    kind: StorageClass
-    apiVersion: storage.k8s.io/v1
-    metadata:
-      name: longhorn
-      annotations:
-        storageclass.kubernetes.io/is-default-class: "true"
-    provisioner: driver.longhorn.io
-    allowVolumeExpansion: true
-    reclaimPolicy: "Delete"
-    volumeBindingMode: Immediate
-    parameters:
-      numberOfReplicas: "3"
-      staleReplicaTimeout: "30"
-      fromBackup: ""
-      baseImage: ""
 ---
-# Source: longhorn/templates/crds.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
     longhorn-manager: Engine
   name: engines.longhorn.io
 spec:
@@ -186,16 +116,10 @@ spec:
       type: date
       jsonPath: .metadata.creationTimestamp
 ---
-# Source: longhorn/templates/crds.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
     longhorn-manager: Replica
   name: replicas.longhorn.io
 spec:
@@ -247,16 +171,10 @@ spec:
       type: date
       jsonPath: .metadata.creationTimestamp
 ---
-# Source: longhorn/templates/crds.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
     longhorn-manager: Setting
   name: settings.longhorn.io
 spec:
@@ -285,16 +203,10 @@ spec:
       type: date
       jsonPath: .metadata.creationTimestamp
 ---
-# Source: longhorn/templates/crds.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
     longhorn-manager: Volume
   name: volumes.longhorn.io
 spec:
@@ -346,16 +258,10 @@ spec:
       type: date
       jsonPath: .metadata.creationTimestamp
 ---
-# Source: longhorn/templates/crds.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
     longhorn-manager: EngineImage
   name: engineimages.longhorn.io
 spec:
@@ -403,16 +309,10 @@ spec:
       type: date
       jsonPath: .metadata.creationTimestamp
 ---
-# Source: longhorn/templates/crds.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
     longhorn-manager: Node
   name: nodes.longhorn.io
 spec:
@@ -456,16 +356,10 @@ spec:
       type: date
       jsonPath: .metadata.creationTimestamp
 ---
-# Source: longhorn/templates/crds.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
     longhorn-manager: InstanceManager
   name: instancemanagers.longhorn.io
 spec:
@@ -509,16 +403,10 @@ spec:
       type: date
       jsonPath: .metadata.creationTimestamp
 ---
-# Source: longhorn/templates/crds.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
     longhorn-manager: ShareManager
   name: sharemanagers.longhorn.io
 spec:
@@ -528,7 +416,7 @@ spec:
     listKind: ShareManagerList
     plural: sharemanagers
     shortNames:
-    - lhsm
+      - lhsm
     singular: sharemanager
   scope: Namespaced
   versions:
@@ -546,28 +434,22 @@ spec:
     subresources:
       status: {}
     additionalPrinterColumns:
-    - name: State
-      type: string
-      description: The state of the share manager
-      jsonPath: .status.state
-    - name: Node
-      type: string
-      description: The node that the share manager is owned by
-      jsonPath: .status.ownerID
-    - name: Age
-      type: date
-      jsonPath: .metadata.creationTimestamp
+      - name: State
+        type: string
+        description: The state of the share manager
+        jsonPath: .status.state
+      - name: Node
+        type: string
+        description: The node that the share manager is owned by
+        jsonPath: .status.ownerID
+      - name: Age
+        type: date
+        jsonPath: .metadata.creationTimestamp
 ---
-# Source: longhorn/templates/crds.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
     longhorn-manager: BackingImage
   name: backingimages.longhorn.io
 spec:
@@ -581,38 +463,32 @@ spec:
     singular: backingimage
   scope: Namespaced
   versions:
-  - name: v1beta1
-    served: true
-    storage: true
-    schema:
-      openAPIV3Schema:
-        type: object
-        properties:
-          spec:
-            x-kubernetes-preserve-unknown-fields: true
-          status:
-            x-kubernetes-preserve-unknown-fields: true
-    subresources:
-      status: {}
-    additionalPrinterColumns:
-    - name: Image
-      type: string
-      description: The backing image name
-      jsonPath: .spec.image
-    - name: Age
-      type: date
-      jsonPath: .metadata.creationTimestamp
+    - name: v1beta1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+            status:
+              x-kubernetes-preserve-unknown-fields: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Image
+          type: string
+          description: The backing image name
+          jsonPath: .spec.image
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
 ---
-# Source: longhorn/templates/crds.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
     longhorn-manager: BackingImageManager
   name: backingimagemanagers.longhorn.io
 spec:
@@ -622,7 +498,7 @@ spec:
     listKind: BackingImageManagerList
     plural: backingimagemanagers
     shortNames:
-      - lhbim
+    - lhbim
     singular: backingimagemanager
   scope: Namespaced
   versions:
@@ -664,182 +540,143 @@ spec:
       type: date
       jsonPath: .metadata.creationTimestamp
 ---
-# Source: longhorn/templates/clusterrole.yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: longhorn-role
-  labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
-rules:
-- apiGroups:
-  - apiextensions.k8s.io
-  resources:
-  - customresourcedefinitions
-  verbs:
-  - "*"
-- apiGroups: [""]
-  resources: ["pods", "events", "persistentvolumes", "persistentvolumeclaims","persistentvolumeclaims/status", "nodes", "proxy/nodes", "pods/log", "secrets", "services", "endpoints", "configmaps"]
-  verbs: ["*"]
-- apiGroups: [""]
-  resources: ["namespaces"]
-  verbs: ["get", "list"]
-- apiGroups: ["apps"]
-  resources: ["daemonsets", "statefulsets", "deployments"]
-  verbs: ["*"]
-- apiGroups: ["batch"]
-  resources: ["jobs", "cronjobs"]
-  verbs: ["*"]
-- apiGroups: ["policy"]
-  resources: ["poddisruptionbudgets"]
-  verbs: ["*"]
-- apiGroups: ["scheduling.k8s.io"]
-  resources: ["priorityclasses"]
-  verbs: ["watch", "list"]
-- apiGroups: ["storage.k8s.io"]
-  resources: ["storageclasses", "volumeattachments", "csinodes", "csidrivers"]
-  verbs: ["*"]
-- apiGroups: ["snapshot.storage.k8s.io"]
-  resources: ["volumesnapshotclasses", "volumesnapshots", "volumesnapshotcontents", "volumesnapshotcontents/status"]
-  verbs: ["*"]
-- apiGroups: ["longhorn.io"]
-  resources: ["volumes", "volumes/status", "engines", "engines/status", "replicas", "replicas/status", "settings",
-              "engineimages", "engineimages/status", "nodes", "nodes/status", "instancemanagers", "instancemanagers/status",
-              "sharemanagers", "sharemanagers/status", "backingimages", "backingimages/status", "backingimagemanagers", "backingimagemanagers/status"]
-  verbs: ["*"]
-- apiGroups: ["coordination.k8s.io"]
-  resources: ["leases"]
-  verbs: ["*"]
-- apiGroups: ["metrics.k8s.io"]
-  resources: ["pods", "nodes"]
-  verbs: ["get", "list"]
----
-# Source: longhorn/templates/clusterrolebinding.yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: longhorn-bind
-  labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: longhorn-role
-subjects:
-- kind: ServiceAccount
-  name: longhorn-service-account
+  name: longhorn-default-setting
   namespace: storage
+data:
+  default-setting.yaml: |-
+    backup-target:
+    backup-target-credential-secret:
+    allow-recurring-job-while-volume-detached:
+    create-default-disk-labeled-nodes:
+    default-data-path:
+    replica-soft-anti-affinity:
+    storage-over-provisioning-percentage:
+    storage-minimal-available-percentage:
+    upgrade-checker:
+    default-replica-count:
+    default-data-locality:
+    guaranteed-engine-cpu:
+    default-longhorn-static-storage-class:
+    backupstore-poll-interval:
+    taint-toleration:
+    system-managed-components-node-selector:
+    priority-class:
+    auto-salvage:
+    auto-delete-pod-when-volume-detached-unexpectedly:
+    disable-scheduling-on-cordoned-node:
+    replica-zone-soft-anti-affinity:
+    volume-attachment-recovery-policy:
+    node-down-pod-deletion-policy:
+    allow-node-drain-with-last-healthy-replica:
+    mkfs-ext4-parameters:
+    disable-replica-rebuild:
+    replica-replenishment-wait-interval:
+    disable-revision-counter:
+    system-managed-pods-image-pull-policy:
+    allow-volume-creation-with-degraded-availability:
+    auto-cleanup-system-generated-snapshot:
+    concurrent-automatic-engine-upgrade-per-node-limit:
+    backing-image-cleanup-wait-interval:
+    guaranteed-engine-manager-cpu:
+    guaranteed-replica-manager-cpu:
+
 ---
-# Source: longhorn/templates/psp.yaml
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: longhorn-psp
+spec:
+  privileged: true
+  allowPrivilegeEscalation: true
+  requiredDropCapabilities:
+    - NET_RAW
+  allowedCapabilities:
+    - SYS_ADMIN
+  hostNetwork: false
+  hostIPC: false
+  hostPID: true
+  runAsUser:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  fsGroup:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  volumes:
+    - configMap
+    - downwardAPI
+    - emptyDir
+    - secret
+    - projected
+    - hostPath
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: longhorn-psp-role
-  labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
   namespace: storage
 rules:
-- apiGroups:
-  - policy
-  resources:
-  - podsecuritypolicies
-  verbs:
-  - use
-  resourceNames:
-  - longhorn-psp
+  - apiGroups:
+      - policy
+    resources:
+      - podsecuritypolicies
+    verbs:
+      - use
+    resourceNames:
+      - longhorn-psp
 ---
-# Source: longhorn/templates/psp.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: longhorn-psp-binding
-  labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
   namespace: storage
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: longhorn-psp-role
 subjects:
-- kind: ServiceAccount
-  name: longhorn-service-account
-  namespace: storage
-- kind: ServiceAccount
-  name: default
-  namespace: storage
+  - kind: ServiceAccount
+    name: longhorn-service-account
+    namespace: storage
+  - kind: ServiceAccount
+    name: default
+    namespace: storage
 ---
-# Source: longhorn/templates/daemonset-sa.yaml
 apiVersion: v1
-kind: Service
+kind: ConfigMap
 metadata:
-  labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
-    app: longhorn-manager
-  name: longhorn-backend
+  name: longhorn-storageclass
   namespace: storage
-spec:
-  type: ClusterIP
-  sessionAffinity: ClientIP
-  selector:
-    app: longhorn-manager
-  ports:
-  - name: manager
-    port: 9500
-    targetPort: manager
+data:
+  storageclass.yaml: |
+    kind: StorageClass
+    apiVersion: storage.k8s.io/v1
+    metadata:
+      name: longhorn
+    provisioner: driver.longhorn.io
+    allowVolumeExpansion: true
+    reclaimPolicy: Delete
+    volumeBindingMode: Immediate
+    parameters:
+      numberOfReplicas: "3"
+      staleReplicaTimeout: "2880"
+      fromBackup: ""
+    #  backingImage: "bi-test"
+    #  backingImageURL: "https://backing-image-example.s3-region.amazonaws.com/test-backing-image"
+    #  diskSelector: "ssd,fast"
+    #  nodeSelector: "storage,fast"
+    #  recurringJobs: '[{"name":"snap", "task":"snapshot", "cron":"*/1 * * * *", "retain":1},
+    #                   {"name":"backup", "task":"backup", "cron":"*/2 * * * *", "retain":1,
+    #                    "labels": {"interval":"2m"}}]'
 ---
-# Source: longhorn/templates/deployment-ui.yaml
-kind: Service
-apiVersion: v1
-metadata:
-  labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
-    app: longhorn-ui
-  name: longhorn-frontend
-  namespace: storage
-spec:
-  type: ClusterIP
-  selector:
-    app: longhorn-ui
-  ports:
-  - name: http
-    port: 80
-    targetPort: http
-    nodePort: null
----
-# Source: longhorn/templates/daemonset-sa.yaml
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
     app: longhorn-manager
   name: longhorn-manager
   namespace: storage
@@ -850,11 +687,6 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: longhorn
-        helm.sh/chart: longhorn-1.1.1
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/instance: longhorn
-        app.kubernetes.io/version: v1.1.2-rc1
         app: longhorn-manager
     spec:
       containers:
@@ -868,15 +700,15 @@ spec:
         - -d
         - daemon
         - --engine-image
-        - "longhornio/longhorn-engine:v1.1.2-rc1"
+        - longhornio/longhorn-engine:v1.1.2-rc1
         - --instance-manager-image
-        - "longhornio/longhorn-instance-manager:v1_20210621"
+        - longhornio/longhorn-instance-manager:v1_20210621
         - --share-manager-image
-        - "longhornio/longhorn-share-manager:v1_20210416"
+        - longhornio/longhorn-share-manager:v1_20210416
         - --backing-image-manager-image
-        - "longhornio/backing-image-manager:v1_20210422"
+        - longhornio/backing-image-manager:v1_20210422
         - --manager-image
-        - "longhornio/longhorn-manager:v1.1.2-rc1"
+        - longhornio/longhorn-manager:v1.1.2-rc1
         - --service-account
         - longhorn-service-account
         ports:
@@ -908,6 +740,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
+        # Should be: mount path of the volume longhorn-default-setting + the key of the configmap data in 04-default-setting.yaml
         - name: DEFAULT_SETTING_PATH
           value: /var/lib/longhorn-setting/default-setting.yaml
       volumes:
@@ -923,23 +756,102 @@ spec:
       - name: longhorn-default-setting
         configMap:
           name: longhorn-default-setting
+      imagePullSecrets:
+      - name: "regcred"
+#      priorityClassName:
+#      tolerations:
+#      - key: "key"
+#        operator: "Equal"
+#        value: "value"
+#        effect: "NoSchedule"
+#      nodeSelector:
+#        label-key1: "label-value1"
+#        label-key2: "label-value2"
       serviceAccountName: longhorn-service-account
   updateStrategy:
     rollingUpdate:
       maxUnavailable: "100%"
 ---
-# Source: longhorn/templates/deployment-driver.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: longhorn-manager
+  name: longhorn-backend
+  namespace: storage
+spec:
+  type: ClusterIP
+  sessionAffinity: ClientIP
+  selector:
+    app: longhorn-manager
+  ports:
+  - name: manager
+    port: 9500
+    targetPort: manager
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: longhorn-ui
+  name: longhorn-ui
+  namespace: storage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: longhorn-ui
+  template:
+    metadata:
+      labels:
+        app: longhorn-ui
+    spec:
+      containers:
+      - name: longhorn-ui
+        image: longhornio/longhorn-ui:v1.1.2-rc1
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsUser: 0
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+          - name: LONGHORN_MANAGER_IP
+            value: "http://longhorn-backend:9500"
+      imagePullSecrets:
+        - name: "regcred"
+#      priorityClassName:
+#      tolerations:
+#      - key: "key"
+#        operator: "Equal"
+#        value: "value"
+#        effect: "NoSchedule"
+#      nodeSelector:
+#        label-key1: "label-value1"
+#        label-key2: "label-value2"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: longhorn-ui
+  name: longhorn-frontend
+  namespace: storage
+spec:
+  type: ClusterIP
+  selector:
+    app: longhorn-ui
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+    nodePort: null
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: longhorn-driver-deployer
   namespace: storage
-  labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
 spec:
   replicas: 1
   selector:
@@ -948,11 +860,6 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: longhorn
-        helm.sh/chart: longhorn-1.1.1
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/instance: longhorn
-        app.kubernetes.io/version: v1.1.2-rc1
         app: longhorn-driver-deployer
     spec:
       initContainers:
@@ -968,7 +875,7 @@ spec:
           - -d
           - deploy-driver
           - --manager-image
-          - "longhornio/longhorn-manager:v1.1.2-rc1"
+          - longhornio/longhorn-manager:v1.1.2-rc1
           - --manager-url
           - http://longhorn-backend:9500/v1
           env:
@@ -984,148 +891,43 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: spec.serviceAccountName
-          - name: CSI_ATTACHER_IMAGE
-            value: "longhornio/csi-attacher:v2.2.1-lh1"
-          - name: CSI_PROVISIONER_IMAGE
-            value: "longhornio/csi-provisioner:v1.6.0-lh1"
-          - name: CSI_NODE_DRIVER_REGISTRAR_IMAGE
-            value: "longhornio/csi-node-driver-registrar:v1.2.0-lh1"
-          - name: CSI_RESIZER_IMAGE
-            value: "longhornio/csi-resizer:v0.5.1-lh1"
-          - name: CSI_SNAPSHOTTER_IMAGE
-            value: "longhornio/csi-snapshotter:v2.1.1-lh1"
+          # Manually set root directory for csi
+          #- name: KUBELET_ROOT_DIR
+          #  value: /var/lib/rancher/k3s/agent/kubelet
+          # For AirGap Installation
+          # Replace PREFIX with your private registry
+          #- name: CSI_ATTACHER_IMAGE
+          #  value: PREFIX/csi-attacher:v2.2.1-lh1
+          #- name: CSI_PROVISIONER_IMAGE
+          #  value: PREFIX/csi-provisioner:v1.6.0-lh1
+          #- name: CSI_NODE_DRIVER_REGISTRAR_IMAGE
+          #  value: PREFIX/csi-node-driver-registrar:v1.2.0-lh1
+          #- name: CSI_RESIZER_IMAGE
+          #  value: PREFIX/csi-resizer:v0.5.1-lh1
+          #- name: CSI_SNAPSHOTTER_IMAGE
+          #  value: PREFIX/csi-snapshotter:v2.1.1-lh1
+          # Manually specify number of CSI attacher replicas
+          #- name: CSI_ATTACHER_REPLICA_COUNT
+          #  value: "3"
+          # Manually specify number of CSI provisioner replicas
+          #- name: CSI_PROVISIONER_REPLICA_COUNT
+          #  value: "3"
+          #- name: CSI_RESIZER_REPLICA_COUNT
+          #  value: "3"
+          #- name: CSI_SNAPSHOTTER_REPLICA_COUNT
+          #  value: "3"
+      imagePullSecrets:
+        - name: "regcred"
+#      priorityClassName:
+#      tolerations:
+#      - key: "key"
+#        operator: "Equal"
+#        value: "value"
+#        effect: "NoSchedule"
+#      nodeSelector:
+#        label-key1: "label-value1"
+#        label-key2: "label-value2"
       serviceAccountName: longhorn-service-account
       securityContext:
         runAsUser: 0
 ---
-# Source: longhorn/templates/deployment-ui.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
-    app: longhorn-ui
-  name: longhorn-ui
-  namespace: storage
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: longhorn-ui
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: longhorn
-        helm.sh/chart: longhorn-1.1.1
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/instance: longhorn
-        app.kubernetes.io/version: v1.1.2-rc1
-        app: longhorn-ui
-    spec:
-      containers:
-      - name: longhorn-ui
-        image: longhornio/longhorn-ui:v1.1.2-rc1
-        imagePullPolicy: IfNotPresent
-        securityContext:
-          runAsUser: 0
-        ports:
-        - containerPort: 8000
-          name: http
-        env:
-          - name: LONGHORN_MANAGER_IP
-            value: "http://longhorn-backend:9500"
----
-# Source: longhorn/templates/postupgrade-job.yaml
-apiVersion: batch/v1
-kind: Job
-metadata:
-  annotations:
-    "helm.sh/hook": post-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
-  name: longhorn-post-upgrade
-  namespace: storage
-  labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
-spec:
-  activeDeadlineSeconds: 900
-  backoffLimit: 1
-  template:
-    metadata:
-      name: longhorn-post-upgrade
-      labels:
-        app.kubernetes.io/name: longhorn
-        helm.sh/chart: longhorn-1.1.1
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/instance: longhorn
-        app.kubernetes.io/version: v1.1.2-rc1
-    spec:
-      containers:
-      - name: longhorn-post-upgrade
-        image: longhornio/longhorn-manager:v1.1.2-rc1
-        imagePullPolicy: IfNotPresent
-        securityContext:
-          privileged: true
-        command:
-        - longhorn-manager
-        - post-upgrade
-        env:
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-      restartPolicy: OnFailure
-      serviceAccountName: longhorn-service-account
----
-# Source: longhorn/templates/uninstall-job.yaml
-apiVersion: batch/v1
-kind: Job
-metadata:
-  annotations:
-    "helm.sh/hook": pre-delete
-    "helm.sh/hook-delete-policy": hook-succeeded
-  name: longhorn-uninstall
-  namespace: storage
-  labels:
-    app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.1.1
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.1.2-rc1
-spec:
-  activeDeadlineSeconds: 900
-  backoffLimit: 1
-  template:
-    metadata:
-      name: longhorn-uninstall
-      labels:
-        app.kubernetes.io/name: longhorn
-        helm.sh/chart: longhorn-1.1.1
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/instance: longhorn
-        app.kubernetes.io/version: v1.1.2-rc1
-    spec:
-      containers:
-      - name: longhorn-uninstall
-        image: longhornio/longhorn-manager:v1.1.2-rc1
-        imagePullPolicy: IfNotPresent
-        securityContext:
-          privileged: true
-        command:
-        - longhorn-manager
-        - uninstall
-        - --force
-        env:
-        - name: LONGHORN_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-      restartPolicy: OnFailure
-      serviceAccountName: longhorn-service-account
