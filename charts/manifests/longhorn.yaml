@@ -9,48 +9,48 @@ kind: ClusterRole
 metadata:
   name: longhorn-role
 rules:
-- apiGroups:
-  - apiextensions.k8s.io
-  resources:
-  - customresourcedefinitions
-  verbs:
-  - "*"
-- apiGroups: [""]
-  resources: ["pods", "events", "persistentvolumes", "persistentvolumeclaims","persistentvolumeclaims/status", "nodes", "proxy/nodes", "pods/log", "secrets", "services", "endpoints", "configmaps"]
-  verbs: ["*"]
-- apiGroups: [""]
-  resources: ["namespaces"]
-  verbs: ["get", "list"]
-- apiGroups: ["apps"]
-  resources: ["daemonsets", "statefulsets", "deployments"]
-  verbs: ["*"]
-- apiGroups: ["batch"]
-  resources: ["jobs", "cronjobs"]
-  verbs: ["*"]
-- apiGroups: ["policy"]
-  resources: ["poddisruptionbudgets"]
-  verbs: ["*"]
-- apiGroups: ["scheduling.k8s.io"]
-  resources: ["priorityclasses"]
-  verbs: ["watch", "list"]
-- apiGroups: ["storage.k8s.io"]
-  resources: ["storageclasses", "volumeattachments", "csinodes", "csidrivers"]
-  verbs: ["*"]
-- apiGroups: ["snapshot.storage.k8s.io"]
-  resources: ["volumesnapshotclasses", "volumesnapshots", "volumesnapshotcontents", "volumesnapshotcontents/status"]
-  verbs: ["*"]
-- apiGroups: ["longhorn.io"]
-  resources: ["volumes", "volumes/status", "engines", "engines/status", "replicas", "replicas/status", "settings",
-              "engineimages", "engineimages/status", "nodes", "nodes/status", "instancemanagers", "instancemanagers/status",
-              "sharemanagers", "sharemanagers/status", "backingimages", "backingimages/status",
-              "backingimagemanagers", "backingimagemanagers/status"]
-  verbs: ["*"]
-- apiGroups: ["coordination.k8s.io"]
-  resources: ["leases"]
-  verbs: ["*"]
-- apiGroups: ["metrics.k8s.io"]
-  resources: ["pods", "nodes"]
-  verbs: ["get", "list"]
+  - apiGroups:
+    - apiextensions.k8s.io
+    resources:
+    - customresourcedefinitions
+    verbs:
+    - "*"
+  - apiGroups: [""]
+    resources: ["pods", "events", "persistentvolumes", "persistentvolumeclaims","persistentvolumeclaims/status", "nodes", "proxy/nodes", "pods/log", "secrets", "services", "endpoints", "configmaps"]
+    verbs: ["*"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list"]
+  - apiGroups: ["apps"]
+    resources: ["daemonsets", "statefulsets", "deployments"]
+    verbs: ["*"]
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["*"]
+  - apiGroups: ["policy"]
+    resources: ["poddisruptionbudgets"]
+    verbs: ["*"]
+  - apiGroups: ["scheduling.k8s.io"]
+    resources: ["priorityclasses"]
+    verbs: ["watch", "list"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["storageclasses", "volumeattachments", "csinodes", "csidrivers"]
+    verbs: ["*"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshotclasses", "volumesnapshots", "volumesnapshotcontents", "volumesnapshotcontents/status"]
+    verbs: ["*"]
+  - apiGroups: ["longhorn.io"]
+    resources: ["volumes", "volumes/status", "engines", "engines/status", "replicas", "replicas/status", "settings",
+                "engineimages", "engineimages/status", "nodes", "nodes/status", "instancemanagers", "instancemanagers/status",
+                "sharemanagers", "sharemanagers/status", "backingimages", "backingimages/status",
+                "backingimagemanagers", "backingimagemanagers/status"]
+    verbs: ["*"]
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["*"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["pods", "nodes"]
+    verbs: ["get", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -61,9 +61,9 @@ roleRef:
   kind: ClusterRole
   name: longhorn-role
 subjects:
-- kind: ServiceAccount
-  name: longhorn-service-account
-  namespace: storage
+  - kind: ServiceAccount
+    name: longhorn-service-account
+    namespace: storage
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -78,43 +78,43 @@ spec:
     listKind: EngineList
     plural: engines
     shortNames:
-    - lhe
+      - lhe
     singular: engine
   scope: Namespaced
   versions:
-  - name: v1beta1
-    served: true
-    storage: true
-    schema:
-      openAPIV3Schema:
-        type: object
-        properties:
-          spec:
-            x-kubernetes-preserve-unknown-fields: true
-          status:
-            x-kubernetes-preserve-unknown-fields: true
-    subresources:
-      status: {}
-    additionalPrinterColumns:
-    - name: State
-      type: string
-      description: The current state of the engine
-      jsonPath: .status.currentState
-    - name: Node
-      type: string
-      description: The node that the engine is on
-      jsonPath: .spec.nodeID
-    - name: InstanceManager
-      type: string
-      description: The instance manager of the engine
-      jsonPath: .status.instanceManagerName
-    - name: Image
-      type: string
-      description: The current image of the engine
-      jsonPath: .status.currentImage
-    - name: Age
-      type: date
-      jsonPath: .metadata.creationTimestamp
+    - name: v1beta1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+            status:
+              x-kubernetes-preserve-unknown-fields: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: State
+          type: string
+          description: The current state of the engine
+          jsonPath: .status.currentState
+        - name: Node
+          type: string
+          description: The node that the engine is on
+          jsonPath: .spec.nodeID
+        - name: InstanceManager
+          type: string
+          description: The instance manager of the engine
+          jsonPath: .status.instanceManagerName
+        - name: Image
+          type: string
+          description: The current image of the engine
+          jsonPath: .status.currentImage
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -129,47 +129,47 @@ spec:
     listKind: ReplicaList
     plural: replicas
     shortNames:
-    - lhr
+      - lhr
     singular: replica
   scope: Namespaced
   versions:
-  - name: v1beta1
-    served: true
-    storage: true
-    schema:
-      openAPIV3Schema:
-        type: object
-        properties:
-          spec:
-            x-kubernetes-preserve-unknown-fields: true
-          status:
-            x-kubernetes-preserve-unknown-fields: true
-    subresources:
-      status: {}
-    additionalPrinterColumns:
-    - name: State
-      type: string
-      description: The current state of the replica
-      jsonPath: .status.currentState
-    - name: Node
-      type: string
-      description: The node that the replica is on
-      jsonPath: .spec.nodeID
-    - name: Disk
-      type: string
-      description: The disk that the replica is on
-      jsonPath: .spec.diskID
-    - name: InstanceManager
-      type: string
-      description: The instance manager of the replica
-      jsonPath: .status.instanceManagerName
-    - name: Image
-      type: string
-      description: The current image of the replica
-      jsonPath: .status.currentImage
-    - name: Age
-      type: date
-      jsonPath: .metadata.creationTimestamp
+    - name: v1beta1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+            status:
+              x-kubernetes-preserve-unknown-fields: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: State
+          type: string
+          description: The current state of the replica
+          jsonPath: .status.currentState
+        - name: Node
+          type: string
+          description: The node that the replica is on
+          jsonPath: .spec.nodeID
+        - name: Disk
+          type: string
+          description: The disk that the replica is on
+          jsonPath: .spec.diskID
+        - name: InstanceManager
+          type: string
+          description: The instance manager of the replica
+          jsonPath: .status.instanceManagerName
+        - name: Image
+          type: string
+          description: The current image of the replica
+          jsonPath: .status.currentImage
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -184,24 +184,24 @@ spec:
     listKind: SettingList
     plural: settings
     shortNames:
-    - lhs
+      - lhs
     singular: setting
   scope: Namespaced
   versions:
-  - name: v1beta1
-    served: true
-    storage: true
-    schema:
-      openAPIV3Schema:
-        x-kubernetes-preserve-unknown-fields: true
-    additionalPrinterColumns:
-    - name: Value
-      type: string
-      description: The value of the setting
-      jsonPath: .value
-    - name: Age
-      type: date
-      jsonPath: .metadata.creationTimestamp
+    - name: v1beta1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          x-kubernetes-preserve-unknown-fields: true
+      additionalPrinterColumns:
+      - name: Value
+        type: string
+        description: The value of the setting
+        jsonPath: .value
+      - name: Age
+        type: date
+        jsonPath: .metadata.creationTimestamp
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -216,47 +216,47 @@ spec:
     listKind: VolumeList
     plural: volumes
     shortNames:
-    - lhv
+      - lhv
     singular: volume
   scope: Namespaced
   versions:
-  - name: v1beta1
-    served: true
-    storage: true
-    schema:
-      openAPIV3Schema:
-        type: object
-        properties:
-          spec:
-            x-kubernetes-preserve-unknown-fields: true
-          status:
-            x-kubernetes-preserve-unknown-fields: true
-    subresources:
-      status: {}
-    additionalPrinterColumns:
-    - name: State
-      type: string
-      description: The state of the volume
-      jsonPath: .status.state
-    - name: Robustness
-      type: string
-      description: The robustness of the volume
-      jsonPath: .status.robustness
-    - name: Scheduled
-      type: string
-      description: The scheduled condition of the volume
-      jsonPath: .status.conditions['scheduled']['status']
-    - name: Size
-      type: string
-      description: The size of the volume
-      jsonPath: .spec.size
-    - name: Node
-      type: string
-      description: The node that the volume is currently attaching to
-      jsonPath: .status.currentNodeID
-    - name: Age
-      type: date
-      jsonPath: .metadata.creationTimestamp
+    - name: v1beta1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+            status:
+              x-kubernetes-preserve-unknown-fields: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: State
+          type: string
+          description: The state of the volume
+          jsonPath: .status.state
+        - name: Robustness
+          type: string
+          description: The robustness of the volume
+          jsonPath: .status.robustness
+        - name: Scheduled
+          type: string
+          description: The scheduled condition of the volume
+          jsonPath: .status.conditions['scheduled']['status']
+        - name: Size
+          type: string
+          description: The size of the volume
+          jsonPath: .spec.size
+        - name: Node
+          type: string
+          description: The node that the volume is currently attaching to
+          jsonPath: .status.currentNodeID
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -271,43 +271,43 @@ spec:
     listKind: EngineImageList
     plural: engineimages
     shortNames:
-    - lhei
+      - lhei
     singular: engineimage
   scope: Namespaced
   versions:
-  - name: v1beta1
-    served: true
-    storage: true
-    schema:
-      openAPIV3Schema:
-        type: object
-        properties:
-          spec:
-            x-kubernetes-preserve-unknown-fields: true
-          status:
-            x-kubernetes-preserve-unknown-fields: true
-    subresources:
-      status: {}
-    additionalPrinterColumns:
-    - name: State
-      type: string
-      description: State of the engine image
-      jsonPath: .status.state
-    - name: Image
-      type: string
-      description: The Longhorn engine image
-      jsonPath: .spec.image
-    - name: RefCount
-      type: integer
-      description: Number of volumes are using the engine image
-      jsonPath: .status.refCount
-    - name: BuildDate
-      type: date
-      description: The build date of the engine image
-      jsonPath: .status.buildDate
-    - name: Age
-      type: date
-      jsonPath: .metadata.creationTimestamp
+    - name: v1beta1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+            status:
+              x-kubernetes-preserve-unknown-fields: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: State
+          type: string
+          description: State of the engine image
+          jsonPath: .status.state
+        - name: Image
+          type: string
+          description: The Longhorn engine image
+          jsonPath: .spec.image
+        - name: RefCount
+          type: integer
+          description: Number of volumes are using the engine image
+          jsonPath: .status.refCount
+        - name: BuildDate
+          type: date
+          description: The build date of the engine image
+          jsonPath: .status.buildDate
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -322,39 +322,39 @@ spec:
     listKind: NodeList
     plural: nodes
     shortNames:
-    - lhn
+      - lhn
     singular: node
   scope: Namespaced
   versions:
-  - name: v1beta1
-    served: true
-    storage: true
-    schema:
-      openAPIV3Schema:
-        type: object
-        properties:
-          spec:
-            x-kubernetes-preserve-unknown-fields: true
-          status:
-            x-kubernetes-preserve-unknown-fields: true
-    subresources:
-      status: {}
-    additionalPrinterColumns:
-    - name: Ready
-      type: string
-      description: Indicate whether the node is ready
-      jsonPath: .status.conditions['Ready']['status']
-    - name: AllowScheduling
-      type: boolean
-      description: Indicate whether the user disabled/enabled replica scheduling for the node
-      jsonPath: .spec.allowScheduling
-    - name: Schedulable
-      type: string
-      description: Indicate whether Longhorn can schedule replicas on the node
-      jsonPath: .status.conditions['Schedulable']['status']
-    - name: Age
-      type: date
-      jsonPath: .metadata.creationTimestamp
+    - name: v1beta1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+            status:
+              x-kubernetes-preserve-unknown-fields: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Ready
+          type: string
+          description: Indicate whether the node is ready
+          jsonPath: .status.conditions['Ready']['status']
+        - name: AllowScheduling
+          type: boolean
+          description: Indicate whether the user disabled/enabled replica scheduling for the node
+          jsonPath: .spec.allowScheduling
+        - name: Schedulable
+          type: string
+          description: Indicate whether Longhorn can schedule replicas on the node
+          jsonPath: .status.conditions['Schedulable']['status']
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -369,39 +369,39 @@ spec:
     listKind: InstanceManagerList
     plural: instancemanagers
     shortNames:
-    - lhim
+      - lhim
     singular: instancemanager
   scope: Namespaced
   versions:
-  - name: v1beta1
-    served: true
-    storage: true
-    schema:
-      openAPIV3Schema:
-        type: object
-        properties:
-          spec:
-            x-kubernetes-preserve-unknown-fields: true
-          status:
-            x-kubernetes-preserve-unknown-fields: true
+    - name: v1beta1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+            status:
+              x-kubernetes-preserve-unknown-fields: true
     subresources:
       status: {}
     additionalPrinterColumns:
-    - name: State
-      type: string
-      description: The state of the instance manager
-      jsonPath: .status.currentState
-    - name: Type
-      type: string
-      description: The type of the instance manager (engine or replica)
-      jsonPath: .spec.type
-    - name: Node
-      type: string
-      description: The node that the instance manager is running on
-      jsonPath: .spec.nodeID
-    - name: Age
-      type: date
-      jsonPath: .metadata.creationTimestamp
+      - name: State
+        type: string
+        description: The state of the instance manager
+        jsonPath: .status.currentState
+      - name: Type
+        type: string
+        description: The type of the instance manager (engine or replica)
+        jsonPath: .spec.type
+      - name: Node
+        type: string
+        description: The node that the instance manager is running on
+        jsonPath: .spec.nodeID
+      - name: Age
+        type: date
+        jsonPath: .metadata.creationTimestamp
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -420,17 +420,17 @@ spec:
     singular: sharemanager
   scope: Namespaced
   versions:
-  - name: v1beta1
-    served: true
-    storage: true
-    schema:
-      openAPIV3Schema:
-        type: object
-        properties:
-          spec:
-            x-kubernetes-preserve-unknown-fields: true
-          status:
-            x-kubernetes-preserve-unknown-fields: true
+    - name: v1beta1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+            status:
+              x-kubernetes-preserve-unknown-fields: true
     subresources:
       status: {}
     additionalPrinterColumns:
@@ -498,47 +498,47 @@ spec:
     listKind: BackingImageManagerList
     plural: backingimagemanagers
     shortNames:
-    - lhbim
+      - lhbim
     singular: backingimagemanager
   scope: Namespaced
   versions:
-  - name: v1beta1
-    served: true
-    storage: true
-    schema:
-      openAPIV3Schema:
-        type: object
-        properties:
-          spec:
-            x-kubernetes-preserve-unknown-fields: true
-          status:
-            x-kubernetes-preserve-unknown-fields: true
+    - name: v1beta1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+            status:
+              x-kubernetes-preserve-unknown-fields: true
     subresources:
       status: {}
     additionalPrinterColumns:
-    - name: State
-      type: string
-      description: The current state of the manager
-      jsonPath: .status.currentState
-    - name: Image
-      type: string
-      description: The image the manager pod will use
-      jsonPath: .spec.image
-    - name: Node
-      type: string
-      description: The node the manager is on
-      jsonPath: .spec.nodeID
-    - name: DiskUUID
-      type: string
-      description: The disk the manager is responsible for
-      jsonPath: .spec.diskUUID
-    - name: DiskPath
-      type: string
-      description: The disk path the manager is using
-      jsonPath: .spec.diskPath
-    - name: Age
-      type: date
-      jsonPath: .metadata.creationTimestamp
+      - name: State
+        type: string
+        description: The current state of the manager
+        jsonPath: .status.currentState
+      - name: Image
+        type: string
+        description: The image the manager pod will use
+        jsonPath: .spec.image
+      - name: Node
+        type: string
+        description: The node the manager is on
+        jsonPath: .spec.nodeID
+      - name: DiskUUID
+        type: string
+        description: The disk the manager is responsible for
+        jsonPath: .spec.diskUUID
+      - name: DiskPath
+        type: string
+        description: The disk path the manager is using
+        jsonPath: .spec.diskPath
+      - name: Age
+        type: date
+        jsonPath: .metadata.creationTimestamp
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -690,74 +690,76 @@ spec:
         app: longhorn-manager
     spec:
       containers:
-      - name: longhorn-manager
-        image: longhornio/longhorn-manager:v1.1.2
-        imagePullPolicy: IfNotPresent
-        securityContext:
-          privileged: true
-        command:
-        - longhorn-manager
-        - -d
-        - daemon
-        - --engine-image
-        - longhornio/longhorn-engine:v1.1.2
-        - --instance-manager-image
-        - longhornio/longhorn-instance-manager:v1_20210621
-        - --share-manager-image
-        - longhornio/longhorn-share-manager:v1_20210416
-        - --backing-image-manager-image
-        - longhornio/backing-image-manager:v1_20210422
-        - --manager-image
-        - longhornio/longhorn-manager:v1.1.2
-        - --service-account
-        - longhorn-service-account
-        ports:
-        - containerPort: 9500
-          name: manager
-        readinessProbe:
-          tcpSocket:
-            port: 9500
-        volumeMounts:
-        - name: dev
-          mountPath: /host/dev/
-        - name: proc
-          mountPath: /host/proc/
-        - name: longhorn
-          mountPath: /var/lib/longhorn/
-          mountPropagation: Bidirectional
-        - name: longhorn-default-setting
-          mountPath: /var/lib/longhorn-setting/
-        env:
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        - name: POD_IP
-          valueFrom:
-            fieldRef:
-              fieldPath: status.podIP
-        - name: NODE_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName
-        # Should be: mount path of the volume longhorn-default-setting + the key of the configmap data in 04-default-setting.yaml
-        - name: DEFAULT_SETTING_PATH
-          value: /var/lib/longhorn-setting/default-setting.yaml
+        - name: longhorn-manager
+          image: longhornio/longhorn-manager:v1.1.2
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+          command:
+            - longhorn-manager
+            - -d
+            - daemon
+            - --engine-image
+            - longhornio/longhorn-engine:v1.1.2
+            - --instance-manager-image
+            - longhornio/longhorn-instance-manager:v1_20210621
+            - --share-manager-image
+            - longhornio/longhorn-share-manager:v1_20210416
+            - --backing-image-manager-image
+            - longhornio/backing-image-manager:v1_20210422
+            - --manager-image
+            - longhornio/longhorn-manager:v1.1.2
+            - --service-account
+            - longhorn-service-account
+          ports:
+            - containerPort: 9500
+              name: manager
+          readinessProbe:
+            tcpSocket:
+              port: 9500
+          volumeMounts:
+            - name: dev
+              mountPath: /host/dev/
+            - name: proc
+              mountPath: /host/proc/
+            - name: longhorn
+              mountPath: /var/lib/longhorn/
+              mountPropagation: Bidirectional
+            - name: longhorn-default-setting
+              mountPath: /var/lib/longhorn-setting/
+          env:
+            - name: TZ
+              value: Europe/Madrid
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            # Should be: mount path of the volume longhorn-default-setting + the key of the configmap data in 04-default-setting.yaml
+            - name: DEFAULT_SETTING_PATH
+              value: /var/lib/longhorn-setting/default-setting.yaml
       volumes:
-      - name: dev
-        hostPath:
-          path: /dev/
-      - name: proc
-        hostPath:
-          path: /proc/
-      - name: longhorn
-        hostPath:
-          path: /var/lib/longhorn/
-      - name: longhorn-default-setting
-        configMap:
-          name: longhorn-default-setting
+        - name: dev
+          hostPath:
+            path: /dev/
+        - name: proc
+          hostPath:
+            path: /proc/
+        - name: longhorn
+          hostPath:
+            path: /var/lib/longhorn/
+        - name: longhorn-default-setting
+          configMap:
+            name: longhorn-default-setting
       imagePullSecrets:
-      - name: "regcred"
+        - name: "regcred"
 #      priorityClassName:
 #      tolerations:
 #      - key: "key"
@@ -785,9 +787,9 @@ spec:
   selector:
     app: longhorn-manager
   ports:
-  - name: manager
-    port: 9500
-    targetPort: manager
+    - name: manager
+      port: 9500
+      targetPort: manager
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -807,17 +809,19 @@ spec:
         app: longhorn-ui
     spec:
       containers:
-      - name: longhorn-ui
-        image: longhornio/longhorn-ui:v1.1.2
-        imagePullPolicy: IfNotPresent
-        securityContext:
-          runAsUser: 0
-        ports:
-        - containerPort: 8000
-          name: http
-        env:
-          - name: LONGHORN_MANAGER_IP
-            value: "http://longhorn-backend:9500"
+        - name: longhorn-ui
+          image: longhornio/longhorn-ui:v1.1.2
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 0
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            - name: TZ
+              value: Europe/Madrid
+            - name: LONGHORN_MANAGER_IP
+              value: "http://longhorn-backend:9500"
       imagePullSecrets:
         - name: "regcred"
 #      priorityClassName:
@@ -842,10 +846,10 @@ spec:
   selector:
     app: longhorn-ui
   ports:
-  - name: http
-    port: 80
-    targetPort: http
-    nodePort: null
+    - name: http
+      port: 80
+      targetPort: http
+      nodePort: null
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -866,31 +870,36 @@ spec:
         - name: wait-longhorn-manager
           image: longhornio/longhorn-manager:v1.1.2
           command: ['sh', '-c', 'while [ $(curl -m 1 -s -o /dev/null -w "%{http_code}" http://longhorn-backend:9500/v1) != "200" ]; do echo waiting; sleep 2; done']
+          env:
+            - name: TZ
+              value: Europe/Madrid
       containers:
         - name: longhorn-driver-deployer
           image: longhornio/longhorn-manager:v1.1.2
           imagePullPolicy: IfNotPresent
           command:
-          - longhorn-manager
-          - -d
-          - deploy-driver
-          - --manager-image
-          - longhornio/longhorn-manager:v1.1.2
-          - --manager-url
-          - http://longhorn-backend:9500/v1
+            - longhorn-manager
+            - -d
+            - deploy-driver
+            - --manager-image
+            - longhornio/longhorn-manager:v1.1.2
+            - --manager-url
+            - http://longhorn-backend:9500/v1
           env:
-          - name: POD_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: NODE_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: spec.nodeName
-          - name: SERVICE_ACCOUNT
-            valueFrom:
-              fieldRef:
-                fieldPath: spec.serviceAccountName
+            - name: TZ
+              value: Europe/Madrid
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: SERVICE_ACCOUNT
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.serviceAccountName
           # Manually set root directory for csi
           #- name: KUBELET_ROOT_DIR
           #  value: /var/lib/rancher/k3s/agent/kubelet
