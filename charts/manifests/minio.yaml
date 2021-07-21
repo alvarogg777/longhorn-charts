@@ -271,6 +271,8 @@ spec:
             - name: http
               containerPort: 9000
           env:
+            - name: TZ
+              value: Europe/Madrid
             - name: MINIO_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
@@ -329,6 +331,8 @@ spec:
         imagePullPolicy: IfNotPresent
         command: ["/bin/sh", "/config/initialize"]
         env:
+          - name: TZ
+            value: Europe/Madrid
           - name: MINIO_ENDPOINT
             value: minio
           - name: MINIO_PORT
