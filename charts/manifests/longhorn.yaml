@@ -1,9 +1,4 @@
 apiVersion: v1
-kind: Namespace
-metadata:
-  name: longhorn-system
----
-apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: longhorn-service-account
@@ -1121,8 +1116,8 @@ spec:
           #  value: "3"
           #- name: CSI_SNAPSHOTTER_REPLICA_COUNT
           #  value: "3"
-       imagePullSecrets:
-         - name: "regcred"
+      imagePullSecrets:
+        - name: "regcred"
 #      priorityClassName:
 #      tolerations:
 #      - key: "key"
