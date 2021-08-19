@@ -121,7 +121,7 @@ spec:
         imagePullPolicy: "IfNotPresent"
         env:
         - name: OPENSEARCH_HOSTS
-          value: https://elastic.alboroto.live # opensearch-cluster-master # "https://elastic.alboroto.live"
+          value: https://elastic.k3d.io # opensearch-cluster-master # "https://elastic.alboroto.live"
         - name: SERVER_HOST
           value: "0.0.0.0"
         ports:
@@ -154,7 +154,7 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-stg
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-    external-dns.alpha.kubernetes.io/hostname: kibana.alboroto.live
+    external-dns.alpha.kubernetes.io/hostname: kibana.k3d.io
     kubernetes.io/ingress.class: traefik
     traefik.frontend.passHostHeader: "true"
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
@@ -162,10 +162,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - "kibana.alboroto.live"
+        - "kibana.k3d.io"
       secretName: authelia-ingress-tls
   rules:
-    - host: "kibana.alboroto.live"
+    - host: "kibana.k3d.io"
       http:
         paths:
           - path: /

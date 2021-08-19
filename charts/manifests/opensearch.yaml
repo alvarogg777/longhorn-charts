@@ -253,19 +253,19 @@ metadata:
     kubernetes.io/ingress.class: traefik
     cert-manager.io/cluster-issuer: letsencrypt-stg
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-    external-dns.alpha.kubernetes.io/hostname: elastic.alboroto.live
-#     ingress.kubernetes.io/auth-url: http://authelia-service.istio-system.svc:80/api/verify?rd=https://auth.alboroto.live/
+    external-dns.alpha.kubernetes.io/hostname: elastic.k3d.io
+    #  ingress.kubernetes.io/auth-url: http://authelia-service.istio-system.svc:80/api/verify?rd=https://auth.alboroto.live/
     traefik.frontend.passHostHeader: "true"
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.middlewares: istio-system-authelia@kubernetescrd
+    # traefik.ingress.kubernetes.io/router.middlewares: istio-system-authelia@kubernetescrd
     # traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
 spec:
   tls:
    - secretName: authelia-ingress-tls
      hosts:
-       - elastic.alboroto.live
+       - elastic.k3d.io
   rules:
-    - host: elastic.alboroto.live
+    - host: elastic.k3d.io
       http:
         paths:
           - path: /
