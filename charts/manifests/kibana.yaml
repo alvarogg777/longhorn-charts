@@ -122,7 +122,7 @@ spec:
         env:
         #- name: ELASTICSEARCH_HOSTS
         - name: OPENSEARCH_HOSTS
-          value: http://opensearch-cluster-master # "https://elastic.alboroto.live"
+          value: https://opensearch-cluster-master:9200 # "https://elastic.alboroto.live"
         - name: SERVER_HOST
           value: "0.0.0.0"
         ports:
