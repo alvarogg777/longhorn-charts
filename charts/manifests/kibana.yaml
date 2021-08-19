@@ -121,7 +121,7 @@ spec:
         imagePullPolicy: "IfNotPresent"
         env:
         - name: OPENSEARCH_HOSTS
-          value: elasticsearch # opensearch-cluster-master # "https://elastic.alboroto.live"
+          value: http://elasticsearch-0:9200 # opensearch-cluster-master # "https://elastic.alboroto.live"
         - name: SERVER_HOST
           value: "0.0.0.0"
         ports:
