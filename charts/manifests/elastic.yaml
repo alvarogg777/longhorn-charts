@@ -16,7 +16,7 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['elasticsearch:9200']
+      args: ['https://elastic.k3d.io']
   restartPolicy: Never
 MANIFEST:
 ---
