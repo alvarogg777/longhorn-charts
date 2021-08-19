@@ -131,10 +131,10 @@ spec:
         resources:
           limits:
             cpu: 100m
-            memory: 512M
+            memory: 2048M
           requests:
             cpu: 100m
-            memory: 512M
+            memory: 2048M
         volumeMounts:
           - name: config
             mountPath: /usr/share/dashboards/config/dashboards.yml
