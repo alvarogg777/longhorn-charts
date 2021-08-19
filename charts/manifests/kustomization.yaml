@@ -7,8 +7,8 @@ resources:
 - authsecrets.yaml
 - postgres.yaml
 - minio.yaml
-- elastic.yaml
-- kibana.yaml
+#- elastic.yaml
+#- kibana.yaml
 #patchesStrategicMerge:
 #- patch-chart.yaml
 namespace: storage
