@@ -37,6 +37,9 @@ metadata:
 data:
   opensearch.yml: |
     cluster.name: opensearch-cluster
+    discovery:
+      type: single-node
+      seed_hosts: ""
     network.host: 0.0.0.0
     plugins:
       security:
@@ -215,8 +218,8 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
-          #- name: cluster.initial_master_nodes
-          #  value: "opensearch-cluster-master-0"
+          - name: cluster.initial_master_nodes
+            value: ""
           - name: discovery.seed_hosts
             value: ""
           - name: discovery.type
