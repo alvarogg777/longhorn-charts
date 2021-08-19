@@ -143,7 +143,7 @@ spec:
       release: "opensearch"
       chart: "opensearch"
       app: "opensearch-cluster-master"
-  replicas: 3
+  replicas: 1
   podManagementPolicy: Parallel
   updateStrategy:
     type: RollingUpdate
