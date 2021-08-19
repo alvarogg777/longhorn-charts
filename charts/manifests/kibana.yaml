@@ -117,7 +117,7 @@ spec:
             - ALL
           runAsNonRoot: true
           runAsUser: 1000
-        image: "alvarogg777/opensearch-dashboards:1.0.0"
+        image: kibana:7.14.0 # "alvarogg777/opensearch-dashboards:1.0.0"
         imagePullPolicy: "IfNotPresent"
         env:
         - name: OPENSEARCH_HOSTS
