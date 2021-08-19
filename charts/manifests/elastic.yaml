@@ -18,7 +18,6 @@ spec:
       command: ['wget']
       args: ['https://elastic.k3d.io']
   restartPolicy: Never
-MANIFEST:
 ---
 # Source: elasticsearch/templates/service-internal.yaml
 apiVersion: v1
