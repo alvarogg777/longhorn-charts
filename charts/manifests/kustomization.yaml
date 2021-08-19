@@ -7,7 +7,7 @@ resources:
 - authsecrets.yaml
 - postgres.yaml
 - minio.yaml
-#- opensearch.yaml
+- elastic.yaml
 - kibana.yaml
 #patchesStrategicMerge:
 #- patch-chart.yaml
