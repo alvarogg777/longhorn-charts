@@ -5,7 +5,7 @@ metadata:
   labels:
     type: local
 spec:
-  storageClassName: manual-elastic
+  storageClassName: manual
   accessModes:
     - ReadWriteMany
   capacity:

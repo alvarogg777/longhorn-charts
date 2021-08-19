@@ -159,7 +159,7 @@ spec:
       resources:
         requests:
           storage: "10Gi"
-      storageClassName: "manual-elastic"
+      storageClassName: "manual"
   template:
     metadata:
       name: "opensearch-cluster-master"
