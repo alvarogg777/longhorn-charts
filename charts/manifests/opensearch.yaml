@@ -218,7 +218,9 @@ spec:
           - name: cluster.initial_master_nodes
             value: "opensearch-cluster-master-0"
           - name: discovery.seed_hosts
-            value: "opensearch-cluster-master-headless"
+            value: ""
+          - name: discovery.type
+            value: single-node
           - name: cluster.name
             value: "opensearch-cluster"
           - name: network.host
