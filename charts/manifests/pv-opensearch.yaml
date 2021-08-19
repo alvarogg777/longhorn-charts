@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  namespace: elastic
+  name: pv-nfs-elastic
+  labels:
+    type: local
+spec:
+  storageClassName: manual-elastic
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 10Gi
+  hostPath:
+    path: '/mnt/nfs/elastic'

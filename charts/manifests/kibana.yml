@@ -1,0 +1,174 @@
+# Source: opensearch-dashboards/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kibana-dashboards
+  labels:
+    helm.sh/chart: opensearch-dashboards-1.0.0
+    app.kubernetes.io/name: opensearch-dashboards
+    app.kubernetes.io/instance: kibana
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: opensearch-dashboards/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kibana-config
+  labels: 
+    helm.sh/chart: opensearch-dashboards-1.0.0
+    app.kubernetes.io/name: opensearch-dashboards
+    app.kubernetes.io/instance: kibana
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  dashboards.yml: |
+    opensearch.ssl.certificateAuthorities: /usr/share/dashboards/certs/dashboards-root-ca.pem
+    server:
+      host: 0.0.0.0
+      name: dashboards
+      ssl:
+        certificate: /usr/share/dashboards/certs/dashboards-crt.pem
+        enabled: false
+        key: /usr/share/dashboards/certs/dashboards-key.pem
+---
+# Source: opensearch-dashboards/templates/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app: kibana
+    chart: "opensearch-dashboards-1.0.0"
+    release: "kibana"
+    heritage: "Helm"
+  name: kibana-dashboards-rolebinding
+roleRef:
+  kind: Role
+  name: kibana-dashboards
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: kibana-dashboards
+  namespace: storage
+---
+# Source: opensearch-dashboards/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+  labels:
+    helm.sh/chart: opensearch-dashboards-1.0.0
+    app.kubernetes.io/name: opensearch-dashboards
+    app.kubernetes.io/instance: kibana
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5601
+      protocol: TCP
+      name: http
+      targetPort: 5601
+  selector:
+    app: opensearch-dashboards
+    release: "kibana"
+---
+# Source: opensearch-dashboards/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  labels:
+    helm.sh/chart: opensearch-dashboards-1.0.0
+    app.kubernetes.io/name: opensearch-dashboards
+    app.kubernetes.io/instance: kibana
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: opensearch-dashboards
+      release: "kibana"
+  template:
+    metadata:
+      labels:
+        app: opensearch-dashboards
+        release: "kibana"
+      annotations:
+        configchecksum: c2d8bdef2aecb5a0ae4eacd4c9a9555e2967b4c28e2f15d0e57ecba7331f316
+    spec:
+      securityContext:
+        {}
+      serviceAccountName: kibana-dashboards
+      volumes:
+        - name: config
+          configMap:
+            name: kibana-config
+      imagePullSecrets:
+        - name: regcred
+      containers:
+      - name: dashboards
+        securityContext:
+          capabilities:
+            drop:
+            - ALL
+          runAsNonRoot: true
+          runAsUser: 1000
+        image: "alvarogg777/opensearch-dashboards:1.0.0"
+        imagePullPolicy: "IfNotPresent"
+        env:
+        - name: OPENSEARCH_HOSTS
+          value: https://elastic.alboroto.live # opensearch-cluster-master # "https://elastic.alboroto.live"
+        - name: SERVER_HOST
+          value: "0.0.0.0"
+        ports:
+        - containerPort: 5601
+          name: http
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 100m
+            memory: 512M
+          requests:
+            cpu: 100m
+            memory: 512M
+        volumeMounts:
+          - name: config
+            mountPath: /usr/share/dashboards/config/dashboards.yml
+            subPath: dashboards.yml
+---
+# Source: opensearch-dashboards/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: kibana
+  labels:
+    helm.sh/chart: opensearch-dashboards-1.0.0
+    app.kubernetes.io/name: opensearch-dashboards
+    app.kubernetes.io/instance: kibana
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-stg
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    external-dns.alpha.kubernetes.io/hostname: kibana.alboroto.live
+    kubernetes.io/ingress.class: traefik
+    traefik.frontend.passHostHeader: "true"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    # traefik.ingress.kubernetes.io/router.middlewares: istio-system-authelia@kubernetescrd
+spec:
+  tls:
+    - hosts:
+        - "kibana.alboroto.live"
+      secretName: authelia-ingress-tls
+  rules:
+    - host: "kibana.alboroto.live"
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kibana
+              servicePort: 5601

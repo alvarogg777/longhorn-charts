@@ -1,0 +1,277 @@
+# Source: opensearch/templates/networkpolicy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: opensearch-cluster-master-opensearch-net
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              opensearch-cluster-master-transport-client: "true"
+  podSelector:
+    matchLabels:
+      opensearch-cluster-master-transport-client: "true"
+---
+# Source: opensearch/templates/poddisruptionbudget.yaml
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: "opensearch-cluster-master-pdb"
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: "opensearch-cluster-master"
+---
+# Source: opensearch/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opensearch-cluster-master-config
+  labels:
+    heritage: "Helm"
+    release: "opensearch"
+    chart: "opensearch"
+    app: "opensearch-cluster-master"
+data:
+  opensearch.yml: |
+    cluster.name: opensearch-cluster
+    network.host: 0.0.0.0
+    plugins:
+      security:
+        allow_default_init_securityindex: true
+        allow_unsafe_democertificates: true
+        audit.type: internal_opensearch
+        authcz:
+          admin_dn:
+          - CN=kirk,OU=client,O=client,L=test, C=de
+        check_snapshot_restore_write_privileges: true
+        enable_snapshot_restore_privilege: true
+        restapi:
+          roles_enabled:
+          - all_access
+          - security_rest_api_access
+        ssl:
+          http:
+            enabled: false
+          transport:
+            enforce_hostname_verification: false
+            pemcert_filepath: esnode.pem
+            pemkey_filepath: esnode-key.pem
+            pemtrustedcas_filepath: root-ca.pem
+        system_indices:
+          enabled: true
+          indices:
+          - .opendistro-alerting-config
+          - .opendistro-alerting-alert*
+          - .opendistro-anomaly-results*
+          - .opendistro-anomaly-detector*
+          - .opendistro-anomaly-checkpoints
+          - .opendistro-anomaly-detection-state
+          - .opendistro-reports-*
+          - .opendistro-notifications-*
+          - .opendistro-notebooks
+          - .opendistro-asynchronous-search-response*
+---
+# Source: opensearch/templates/service.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: opensearch-cluster-master
+  labels:
+    heritage: "Helm"
+    release: "opensearch"
+    chart: "opensearch"
+    app: "opensearch-cluster-master"
+  annotations:
+    {}
+spec:
+  type: ClusterIP
+  selector:
+    release: "opensearch"
+    chart: "opensearch"
+    app: "opensearch-cluster-master"
+  ports:
+  - name: http
+    protocol: TCP
+    port: 9200
+  - name: transport
+    protocol: TCP
+    port: 9300
+---
+# Source: opensearch/templates/service.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: opensearch-cluster-master-headless
+  labels:
+    heritage: "Helm"
+    release: "opensearch"
+    chart: "opensearch"
+    app: "opensearch-cluster-master"
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  clusterIP: None # This is needed for statefulset hostnames like opensearch-0 to resolve
+  # Create endpoints also if the related pod isn't ready
+  publishNotReadyAddresses: true
+  selector:
+    app: "opensearch-cluster-master"
+  ports:
+  - name: http
+    port: 9200
+  - name: transport
+    port: 9300
+---
+# Source: opensearch/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: opensearch-cluster-master
+  labels:
+    heritage: "Helm"
+    release: "opensearch"
+    chart: "opensearch"
+    app: "opensearch-cluster-master"
+  annotations:
+    majorVersion: "7"
+spec:
+  serviceName: opensearch-cluster-master-headless
+  selector:
+    matchLabels:
+      release: "opensearch"
+      chart: "opensearch"
+      app: "opensearch-cluster-master"
+  replicas: 3
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - metadata:
+      name: opensearch-cluster-master
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: manual-elastic
+  template:
+    metadata:
+      name: "opensearch-cluster-master"
+      labels:
+        release: "opensearch"
+        chart: "opensearch"
+        app: "opensearch-cluster-master"
+      annotations:
+        
+        configchecksum: dda698c995d8fc1617f2814b6cb79874ac3bda2331be4cde94d4db480da8ba8
+    spec:
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - "opensearch-cluster-master"
+      terminationGracePeriodSeconds: 120
+      volumes:
+        - name: config
+          configMap:
+            name: opensearch-cluster-master-config
+      imagePullSecrets:
+        - name: regcred
+      enableServiceLinks: true
+      containers:
+      - name: "opensearch"
+        securityContext:
+          capabilities:
+            drop:
+            - ALL
+          runAsNonRoot: true
+          runAsUser: 1000
+        image: "alvarogg777/opensearch-minimal-multiarch:1.0.0"
+        imagePullPolicy: "IfNotPresent"
+        ports:
+        - name: http
+          containerPort: 9200
+        - name: transport
+          containerPort: 9300
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 100Mi
+        env:
+          - name: node.name
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: cluster.initial_master_nodes
+            value: "opensearch-cluster-master-0,opensearch-cluster-master-1,opensearch-cluster-master-2,"
+          - name: discovery.seed_hosts
+            value: "opensearch-cluster-master-headless"
+          - name: cluster.name
+            value: "opensearch-cluster"
+          - name: network.host
+            value: "0.0.0.0"
+          - name: ES_JAVA_OPTS
+            value: "-Xmx512M -Xms512M"
+          - name: node.data
+            value: "true"
+          - name: node.ingest
+            value: "true"
+          - name: node.master
+            value: "true"
+          - name: node.remote_cluster_client
+            value: "true"
+        volumeMounts:
+          - name: "opensearch-cluster-master"
+            mountPath: /usr/share/opensearch/data
+          - name: config
+            mountPath: /usr/share/opensearch/config/opensearch.yml
+            subPath: opensearch.yml
+---
+# Source: opensearch/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: opensearch-cluster-master
+  labels:
+    app: opensearch
+    release: opensearch
+    heritage: Helm
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-stg
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    external-dns.alpha.kubernetes.io/hostname: elastic.alboroto.live
+#     ingress.kubernetes.io/auth-url: http://authelia-service.istio-system.svc:80/api/verify?rd=https://auth.alboroto.live/
+    traefik.frontend.passHostHeader: "true"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: istio-system-authelia@kubernetescrd
+    # traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
+spec:
+  tls:
+   - secretName: authelia-ingress-tls
+     hosts:
+       - elastic.alboroto.live
+  rules:
+    - host: elastic.alboroto.live
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: 
+                name: opensearch-cluster-master
+                port: 
+                  number: 9200
