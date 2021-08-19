@@ -120,8 +120,9 @@ spec:
         image: kibana:7.14.0 # "alvarogg777/opensearch-dashboards:1.0.0"
         imagePullPolicy: "IfNotPresent"
         env:
-        - name: OPENSEARCH_HOSTS
-          value: elastic.k3d.io # opensearch-cluster-master # "https://elastic.alboroto.live"
+        # - name: OPENSEARCH_HOSTS
+        - name: ELASTICSEARCH_HOSTS
+          value: elasticsearch # elastic.k3d.io # opensearch-cluster-master # "https://elastic.alboroto.live"
         - name: SERVER_HOST
           value: "0.0.0.0"
         ports:
