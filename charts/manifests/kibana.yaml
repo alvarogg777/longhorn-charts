@@ -122,7 +122,7 @@ spec:
         env:
         # - name: OPENSEARCH_HOSTS
         - name: ELASTICSEARCH_HOSTS
-          value: elasticsearch # elastic.k3d.io # opensearch-cluster-master # "https://elastic.alboroto.live"
+          value: https://elastic.k3d.io # elastic.k3d.io # opensearch-cluster-master # "https://elastic.alboroto.live"
         - name: SERVER_HOST
           value: "0.0.0.0"
         ports:
