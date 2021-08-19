@@ -1,24 +1,24 @@
-# Source: elasticsearch/templates/tests/test-connection.yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: "elasticsearch-test-connection"
-  labels:
-    helm.sh/chart: elasticsearch-0.4.0
-    app.kubernetes.io/name: elasticsearch
-    app.kubernetes.io/instance: elasticsearch
-    app.kubernetes.io/version: "7.14.0"
-    app.kubernetes.io/managed-by: Helm
-  annotations:
-    "helm.sh/hook": test-success
-spec:
-  containers:
-    - name: wget
-      image: busybox
-      command: ['wget']
-      args: ['https://elastic.k3d.io']
-  restartPolicy: Never
----
+# # Source: elasticsearch/templates/tests/test-connection.yaml
+# apiVersion: v1
+# kind: Pod
+# metadata:
+#   name: "elasticsearch-test-connection"
+#   labels:
+#     helm.sh/chart: elasticsearch-0.4.0
+#     app.kubernetes.io/name: elasticsearch
+#     app.kubernetes.io/instance: elasticsearch
+#     app.kubernetes.io/version: "7.14.0"
+#     app.kubernetes.io/managed-by: Helm
+#   annotations:
+#     "helm.sh/hook": test-success
+# spec:
+#   containers:
+#     - name: wget
+#       image: busybox
+#       command: ['wget']
+#       args: ['https://elastic.k3d.io']
+#   restartPolicy: Never
+# ---
 # Source: elasticsearch/templates/service-internal.yaml
 apiVersion: v1
 kind: Service
