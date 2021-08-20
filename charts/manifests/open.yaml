@@ -269,7 +269,7 @@ metadata:
     external-dns.alpha.kubernetes.io/hostname: open.k3d.io
     kubernetes.io/ingress.class: traefik
     traefik.frontend.passHostHeader: "true"
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
 spec:
   rules:
     - host: open.k3d.io
