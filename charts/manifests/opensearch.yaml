@@ -207,7 +207,7 @@ spec:
         - name: transport
           containerPort: 9300
         resources:
-          requests:
+          limits:
             cpu: 1000m
             memory: 100Mi
         env:
