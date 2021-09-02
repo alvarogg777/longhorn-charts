@@ -100,7 +100,7 @@ data:
         ${MC} mb myminio/$BUCKET
         if [ $BUCKET = "accuayto" ] ; then
           ${MC} cp /storage/txtHeaders.pkl myminio/$BUCKET/txtHeaders.pkl
-          ${MC} cp /storage/aytoMetClust.parquet myminio/$BUCKET/aytoMetClust.parquet
+          ${MC} cp /storage/aytoMetClustEdit.parquet myminio/$BUCKET/aytoMetClustEdit.parquet
         fi
       else
         echo "Bucket '$BUCKET' already exists."
