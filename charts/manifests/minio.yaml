@@ -299,7 +299,10 @@ spec:
                   key: MINIO_SECRET_KEY
           resources:
             requests:
-              memory: 4Gi      
+              memory: 2Gi
+              cpu: 1
+            limits:
+              cpu: 1
       imagePullSecrets:
         - name: regcred
       volumes:
