@@ -7,8 +7,8 @@ resources:
 - longhorn.yaml
 - https://raw.githubusercontent.com/alvarogg777/helm-charts/patch-464a49c/charts/postgres/manifests/postgres.yaml
 - https://raw.githubusercontent.com/alvarogg777/minio-charts/patch-02-14/manifests/minio.yaml
-- opensearch.yaml
-- kibana.yaml
+#- opensearch.yaml
+#- kibana.yaml
 #patchesStrategicMerge:
 # - patch-chart.yaml
 namespace: storage
