@@ -199,7 +199,7 @@ spec:
             - ALL
           runAsNonRoot: true
           runAsUser: 1000
-        image: "alvarogg777/opensearch-minimal-multiarch:1.0.0"
+        image: "alvarogg777/opensearch:1.0.1"
         imagePullPolicy: "IfNotPresent"
         ports:
         - name: http

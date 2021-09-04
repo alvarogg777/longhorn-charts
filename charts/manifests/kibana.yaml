@@ -4,10 +4,10 @@ kind: ServiceAccount
 metadata:
   name: kibana-dashboards
   labels:
-    helm.sh/chart: opensearch-dashboards-1.0.0
+    helm.sh/chart: opensearch-dashboards-1.0.1
     app.kubernetes.io/name: opensearch-dashboards
     app.kubernetes.io/instance: kibana
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/version: "1.0.1"
     app.kubernetes.io/managed-by: Helm
 ---
 # Source: opensearch-dashboards/templates/configmap.yaml
@@ -16,10 +16,10 @@ kind: ConfigMap
 metadata:
   name: kibana-config
   labels: 
-    helm.sh/chart: opensearch-dashboards-1.0.0
+    helm.sh/chart: opensearch-dashboards-1.0.1
     app.kubernetes.io/name: opensearch-dashboards
     app.kubernetes.io/instance: kibana
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/version: "1.0.1"
     app.kubernetes.io/managed-by: Helm
 data:
   dashboards.yml: |
@@ -38,7 +38,7 @@ kind: RoleBinding
 metadata:
   labels:
     app: kibana
-    chart: "opensearch-dashboards-1.0.0"
+    chart: "opensearch-dashboards-1.0.1"
     release: "kibana"
     heritage: "Helm"
   name: kibana-dashboards-rolebinding
@@ -57,10 +57,10 @@ kind: Service
 metadata:
   name: kibana
   labels:
-    helm.sh/chart: opensearch-dashboards-1.0.0
+    helm.sh/chart: opensearch-dashboards-1.0.1
     app.kubernetes.io/name: opensearch-dashboards
     app.kubernetes.io/instance: kibana
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/version: "1.0.1"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -79,10 +79,10 @@ kind: Deployment
 metadata:
   name: kibana
   labels:
-    helm.sh/chart: opensearch-dashboards-1.0.0
+    helm.sh/chart: opensearch-dashboards-1.0.1
     app.kubernetes.io/name: opensearch-dashboards
     app.kubernetes.io/instance: kibana
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/version: "1.0.1"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
@@ -117,7 +117,7 @@ spec:
             - ALL
           runAsNonRoot: true
           runAsUser: 1000
-        image: "alvarogg777/opensearch-dashboards:1.0.0"
+        image: "alvarogg777/opensearch-dashboards:1.0.1"
         imagePullPolicy: "IfNotPresent"
         env:
         - name: OPENSEARCH_HOSTS
@@ -146,10 +146,10 @@ kind: Ingress
 metadata:
   name: kibana
   labels:
-    helm.sh/chart: opensearch-dashboards-1.0.0
+    helm.sh/chart: opensearch-dashboards-1.0.1
     app.kubernetes.io/name: opensearch-dashboards
     app.kubernetes.io/instance: kibana
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/version: "1.0.1"
     app.kubernetes.io/managed-by: Helm
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-stg
