@@ -1,9 +1,9 @@
 resources:
 - namespace.yaml
 - regcred.yaml
-- authsecrets.yaml
+# - authsecrets.yaml
 - longhorn.yaml
-- github.com/alborotogarcia/postgres
+# - github.com/alborotogarcia/postgres
 # - minio-operator.yaml
 # - https://raw.githubusercontent.com/alvarogg777/helm-charts/patch-464a49c/charts/postgres/manifests/postgres.yaml
 # - https://raw.githubusercontent.com/alvarogg777/minio-charts/patch-09-04/manifests/minio.yaml
