@@ -1,7 +1,7 @@
 resources:
 - namespace.yaml
 - regcred.yaml
-# - authsecrets.yaml
+- authsecrets.yaml
 - longhorn.yaml
 # - github.com/alborotogarcia/postgres
 # - minio-operator.yaml
