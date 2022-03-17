@@ -1,0 +1,14 @@
+resources:
+- namespace.yaml
+- regcred.yaml
+- storage-secrets.yaml
+- longhorn.yaml
+# - github.com/alborotogarcia/postgres
+# - minio-operator.yaml
+# - https://raw.githubusercontent.com/alvarogg777/helm-charts/patch-464a49c/charts/postgres/manifests/postgres.yaml
+# - https://raw.githubusercontent.com/alvarogg777/minio-charts/patch-09-04/manifests/minio.yaml
+# - opensearch.yaml
+# - kibana.yaml
+# patchesStrategicMerge:
+#   - patch-chart.yaml
+namespace: storage
