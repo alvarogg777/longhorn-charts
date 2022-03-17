@@ -23,14 +23,14 @@ metadata:
     app.kubernetes.io/managed-by: Helm
 data:
   dashboards.yml: |
-    opensearch.ssl.certificateAuthorities: /usr/share/dashboards/certs/dashboards-root-ca.pem
+    opensearch.ssl.certificateAuthorities: /usr/share/opensearch-dashboards/certs/dashboards-root-ca.pem
     server:
       host: 0.0.0.0
       name: dashboards
       ssl:
-        certificate: /usr/share/dashboards/certs/dashboards-crt.pem
+        certificate: /usr/share/opensearch-dashboards/certs/dashboards-crt.pem
         enabled: false
-        key: /usr/share/dashboards/certs/dashboards-key.pem
+        key: /usr/share/opensearch-dashboards/certs/dashboards-key.pem
 ---
 # Source: opensearch-dashboards/templates/rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -117,11 +117,11 @@ spec:
             - ALL
           runAsNonRoot: true
           runAsUser: 1000
-        image: "alvarogg777/opensearch-dashboards:1.0.1"
+        image: "alvarogg777/opensearch-dashboards:1.1.0-arm64"
         imagePullPolicy: "IfNotPresent"
         env:
         - name: OPENSEARCH_HOSTS
-          value: https://elastic.alboroto.live # opensearch-cluster-master # "https://elastic.alboroto.live"
+          value: http://opensearch-cluster-master:9200 # http://elastic.alboroto.live # opensearch-cluster-master # "https://elastic.alboroto.live"
         - name: SERVER_HOST
           value: "0.0.0.0"
         ports:
@@ -141,7 +141,7 @@ spec:
             subPath: dashboards.yml
 ---
 # Source: opensearch-dashboards/templates/ingress.yaml
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: kibana
@@ -169,6 +169,9 @@ spec:
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: kibana
-              servicePort: 5601
+              service:
+                name: kibana
+                port:
+                  number: 5601
