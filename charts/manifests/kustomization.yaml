@@ -1,6 +1,6 @@
 resources:
 - namespace.yaml
-# - regcred.yaml
+- regcred.yaml
 - storage-secrets.yaml
 - longhorn.yaml
 # - github.com/alborotogarcia/postgres
