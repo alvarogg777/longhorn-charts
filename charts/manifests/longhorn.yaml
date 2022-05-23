@@ -63,7 +63,7 @@ metadata:
     app.kubernetes.io/version: v1.2.4
 type: kubernetes.io/dockerconfigjson
 data:
-  .dockerconfigjson: eyJhdXRocyI6IHsiJSFzKDxuaWw+KSI6IHsiYXV0aCI6ICJKU0Z6S0R4dWFXdytLVG9sSVhNb1BHNXBiRDRwIn19fQ==
+  .dockerconfigjson: eyJhdXRocyI6eyJodHRwczovL2luZGV4LmRvY2tlci5pby92MS8iOnsidXNlcm5hbWUiOiJhbHZhcm9nZzc3NyIsInBhc3N3b3JkIjoiYWdnMTIzNDUiLCJlbWFpbCI6ImFsdmFyby5nYWxsZWdvNzc3QGdtYWlsLmNvbSIsImF1dGgiOiJZV3gyWVhKdloyYzNOemM2WVdkbk1USXpORFU9In19fQ==
 ---
 # Source: longhorn/templates/default-setting.yaml
 apiVersion: v1
