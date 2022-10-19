@@ -1,5 +1,5 @@
 resources:
-- namespace.yaml
+# - namespace.yaml
 - regcred.yaml
 - storage-secrets.yaml
 - longhorn.yaml
