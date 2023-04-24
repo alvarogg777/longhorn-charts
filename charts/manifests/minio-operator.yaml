@@ -1,0 +1,564 @@
+---
+# Source: minio-operator/templates/console-ui.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: console-sa
+  namespace: storage
+---
+# Source: minio-operator/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: minio-operator
+  namespace: storage
+  labels:
+    helm.sh/chart: minio-operator-4.2.12
+    app.kubernetes.io/name: minio-operator
+    app.kubernetes.io/instance: minio-operator
+    app.kubernetes.io/version: "v4.2.12"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: minio-operator/templates/console-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: console-secret
+  namespace: storage
+type: Opaque
+data:
+  ## Passphrase to encrypt jwt payload
+  CONSOLE_PBKDF_PASSPHRASE: U0VDUkVU
+  ## Salt to encrypt jwt payload
+  CONSOLE_PBKDF_SALT: U0VDUkVU
+  ## MinIO User Access Key (used for Console Login)
+  CONSOLE_ACCESS_KEY: WU9VUkNPTlNPTEVBQ0NFU1M=
+  ## MinIO User Secret Key (used for Console Login)
+  CONSOLE_SECRET_KEY: WU9VUkNPTlNPTEVTRUNSRVQ=
+---
+# Source: minio-operator/templates/tenant-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio1-secret
+  namespace: storage
+type: Opaque
+data:
+  ## Access Key for MinIO Tenant --- sealed
+  accesskey: bWluaW8=
+  ## Secret Key for MinIO Tenant
+  secretkey: bWluaW8xMjM=
+---
+# Source: minio-operator/templates/console-ui.yaml
+apiVersion: v1
+data:
+  CONSOLE_PORT: "9090"
+  # CONSOLE_TLS_PORT: "9443"
+kind: ConfigMap
+metadata:
+  name: console-env
+  namespace: storage
+---
+# Source: minio-operator/templates/cluster-role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: minio-operator-role
+rules:
+  - apiGroups:
+      - "apiextensions.k8s.io"
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - get
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - persistentvolumeclaims
+    verbs:
+      - get
+      - update
+      - list
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - watch
+      - list
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - services
+      - events
+      - configmaps
+    verbs:
+      - get
+      - watch
+      - create
+      - list
+      - delete
+      - deletecollection
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - watch
+      - create
+      - update
+      - list
+      - delete
+      - deletecollection
+  - apiGroups:
+      - apps
+    resources:
+      - statefulsets
+      - deployments
+    verbs:
+      - get
+      - create
+      - list
+      - patch
+      - watch
+      - update
+      - delete
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
+    verbs:
+      - get
+      - create
+      - list
+      - patch
+      - watch
+      - update
+      - delete
+  - apiGroups:
+      - "certificates.k8s.io"
+    resources:
+      - "certificatesigningrequests"
+      - "certificatesigningrequests/approval"
+      - "certificatesigningrequests/status"
+    verbs:
+      - update
+      - create
+      - get
+      - delete
+  - apiGroups:
+      - certificates.k8s.io
+    resourceNames:
+      - kubernetes.io/legacy-unknown
+      - kubernetes.io/kube-apiserver-client
+      - kubernetes.io/kubelet-serving
+    resources:
+      - signers
+    verbs:
+      - approve
+      - sign
+  - apiGroups:
+      - minio.min.io
+    resources:
+      - "*"
+    verbs:
+      - "*"
+  - apiGroups:
+      - min.io
+    resources:
+      - "*"
+    verbs:
+      - "*"
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - servicemonitors
+    verbs:
+      - get
+      - create
+      - list
+---
+# Source: minio-operator/templates/console-ui.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: console-sa-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - watch
+  - create
+  - list
+  - patch
+  - update
+  - deletecollection
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  - pods
+  - services
+  - events
+  - resourcequotas
+  - nodes
+  verbs:
+  - get
+  - watch
+  - create
+  - list
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - deletecollection
+  - list
+  - get
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - storageclasses
+  verbs:
+  - get
+  - watch
+  - create
+  - list
+  - patch
+- apiGroups:
+  - apps
+  resources:
+  - statefulsets
+  - deployments
+  verbs:
+  - get
+  - create
+  - list
+  - patch
+  - watch
+  - update
+  - delete
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - get
+  - create
+  - list
+  - patch
+  - watch
+  - update
+  - delete
+- apiGroups:
+  - certificates.k8s.io
+  resources:
+  - certificatesigningrequests
+  - certificatesigningrequests/approval
+  - certificatesigningrequests/status
+  verbs:
+  - update
+  - create
+  - get
+- apiGroups:
+  - minio.min.io
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- apiGroups:
+  - min.io
+  resources:
+  - '*'
+  verbs:
+  - '*'
+---
+# Source: minio-operator/templates/cluster-role-binding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: minio-operator-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: minio-operator-role
+subjects:
+  - kind: ServiceAccount
+    name: minio-operator
+    namespace: storage
+---
+# Source: minio-operator/templates/console-ui.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: console-sa-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: console-sa-role
+subjects:
+- kind: ServiceAccount
+  name: console-sa
+  namespace: storage
+---
+# Source: minio-operator/templates/console-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: console
+  namespace: storage
+  labels:
+    helm.sh/chart: minio-operator-4.2.12
+    app.kubernetes.io/name: minio-operator
+    app.kubernetes.io/instance: minio-operator
+    app.kubernetes.io/version: "v4.2.12"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  ports:
+  - name: http
+    port: 9090
+  #- name: https
+  #  port: 9443
+  selector:
+    app.kubernetes.io/name: minio-operator
+    app.kubernetes.io/instance: minio-operator-console
+---
+# Source: minio-operator/templates/operator-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: operator
+  namespace: storage
+  labels:
+    helm.sh/chart: minio-operator-4.2.12
+    app.kubernetes.io/name: minio-operator
+    app.kubernetes.io/instance: minio-operator
+    app.kubernetes.io/version: "v4.2.12"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4222
+      name: http
+    #- port: 4233
+    #  name: https
+  selector:
+    app.kubernetes.io/name: minio-operator
+    app.kubernetes.io/instance: minio-operator
+---
+# Source: minio-operator/templates/console-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio-operator-console
+  namespace: storage
+  labels:
+    helm.sh/chart: minio-operator-4.2.12
+    app.kubernetes.io/name: minio-operator
+    app.kubernetes.io/instance: minio-operator
+    app.kubernetes.io/version: "v4.2.12"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: minio-operator
+      app.kubernetes.io/instance: minio-operator-console
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: minio-operator
+        app.kubernetes.io/instance: minio-operator-console
+    spec:
+      serviceAccountName: console-sa
+      containers:
+        - name: minio-operator
+          image: "minio/console:v0.10.3"
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 9090
+            name: http
+          #- containerPort: 9443
+          #  name: https
+          args:
+          - server
+          env:
+          - name: CONSOLE_OPERATOR_MODE
+            value: "on"
+          - name: MINIO_OPERATOR_TLS_ENABLE
+            value: "off"
+          - name: MINIO_IDENTITY_OPENID_CONFIG_URL
+            # value: "https://kc.alboroto.live/auth/realms/alborotoproject/.well-known/openid-configuration" # Your external identity provide URL
+            value: "https://kc.dev.achlys.tech/auth/realms/alborotoproject/.well-known/openid-configuration" # Your external identity provide URL
+          - name: MINIO_IDENTITY_OPENID_CLIENT_ID
+            value: "account"
+          - name: MINIO_IDENTITY_OPENID_CLIENT_SECRET
+            value: "4de52651-bc24-4708-ad7a-0ede32080452"
+          - name: MINIO_IDENTITY_OPENID_CLAIM_NAME
+            value: policy
+          #- name: CONSOLE_IDP_CALLBACK
+          #  value: "https://kc.alboroto.live/oauth_callback" # Callback URL for users to authenticate with Console, this is your console service exposes outisde of the cluster
+          resources:
+            {}
+---
+# Source: minio-operator/templates/operator-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "minio-operator"
+  namespace: storage
+  labels:
+    helm.sh/chart: minio-operator-4.2.12
+    app.kubernetes.io/name: minio-operator
+    app.kubernetes.io/instance: minio-operator
+    app.kubernetes.io/version: "v4.2.12"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: minio-operator
+      app.kubernetes.io/instance: minio-operator
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: minio-operator
+        app.kubernetes.io/instance: minio-operator
+    spec:
+      serviceAccountName: minio-operator
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: minio-operator
+          image: "minio/operator:v4.2.12"
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 200m
+              ephemeral-storage: 500Mi
+              memory: 256Mi
+          env:
+          - name: CONSOLE_OPERATOR_MODE
+            value: "on"
+          - name: MINIO_OPERATOR_TLS_ENABLE
+            value: "off"
+          - name: MINIO_IDENTITY_OPENID_CONFIG_URL
+            # value: "https://kc.alboroto.live/auth/realms/alborotoproject/.well-known/openid-configuration" # Your external identity provide URL
+            value: "https://kc.dev.achlys.tech/auth/realms/alborotoproject/.well-known/openid-configuration" # Your external identity provide URL
+          - name: MINIO_IDENTITY_OPENID_CLIENT_ID
+            value: "account"
+          - name: MINIO_IDENTITY_OPENID_CLIENT_SECRET
+            value: "4de52651-bc24-4708-ad7a-0ede32080452"
+          - name: MINIO_IDENTITY_OPENID_CLAIM_NAME
+            value: policy
+---
+# Source: minio-operator/templates/tenant.yaml
+apiVersion: minio.min.io/v2
+kind: Tenant
+metadata:
+  name: minio1
+  namespace: storage
+  ## Optionally pass labels to be applied to the statefulset pods
+  labels:
+    app: minio
+spec:
+  image: minio/minio:RELEASE.2021-07-30T00-02-00Z # :RELEASE.2021-10-08T23-58-24Z
+  imagePullPolicy: IfNotPresent
+  ## Secret with credentials to be used by MinIO Tenant.
+  credsSecret:
+    name: minio1-secret
+  env:
+    #- name: MINIO_IDENTITY_OPENID_CONFIG_URL
+    #  value: http://kc-keycloak-http.istio-system.svc.cluster.local/auth/realms/alborotoproject/.well-known/openid-configuration"  # 
+    - name: MINIO_IDENTITY_OPENID_CONFIG_URL
+      # value: "https://kc.alboroto.live/auth/realms/alborotoproject/.well-known/openid-configuration"
+      value: "https://kc.dev.achlys.tech/auth/realms/alborotoproject/.well-known/openid-configuration"
+    - name: MINIO_IDENTITY_OPENID_CLIENT_ID
+      value: "account"
+    # value: authelia-cli
+    #- name: MINIO_IDENTITY_OPENID_SCOPES
+    #  value: profile,email # openid # roles
+    #  value: openid,miniomapper # profile,email
+    - name: MINIO_IDENTITY_OPENID_CLAIM_NAME
+      value: "policy" # readwrite
+    - name: MINIO_IDENTITY_OPENID_CLIENT_SECRET
+      value: "4de52651-bc24-4708-ad7a-0ede32080452"
+  pools:
+    - servers: 4
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+      volumesPerServer: 1
+      volumeClaimTemplate:
+        metadata:
+          name: data
+        spec:
+          storageClassName: longhorn
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 2Gi
+  mountPath: /export
+  subPath: /data
+  requestAutoCert: true
+  s3:
+    bucketDNS: true
+  podManagementPolicy: Parallel
+  #console:
+  #  image: minio/console:v0.10.3
+  #  replicas: 1
+  #  consoleSecret:
+  #    name: console-secret
+--- 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minio-ingress
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    # external-dns.alpha.kubernetes.io/hostname: minio.alboroto.live
+    # external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-stg
+    traefik.frontend.passHostHeader: "true"
+    # ingress.kubernetes.io/auth-url: http://authelia-service.istio-system.svc:80/api/verify?rd=https://auth.alboroto.live/
+    # traefik.ingress.kubernetes.io/router.middlewares: istio-system-authelia@kubernetescrd
+    # traefik.ingress.kubernetes.io/router.middlewares: istio-system-redirect-https@kubernetescrd
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    # traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: cloudflare
+    # ingress.kubernetes.io/ssl-redirect: "true"
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  tls:
+    - secretName: authelia-ingress-tls # alboroto.live
+      hosts:
+        # - minio.alboroto.live
+        - minio.dev.achlys.tech
+  rules:
+    # - host: minio.alboroto.live
+    - host: minio.dev.achlys.tech
+      http: 
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: minio
+                port:
+                  number: 9090
+
